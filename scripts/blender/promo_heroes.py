@@ -43,6 +43,13 @@ def hollow(objs, size, loc, parent=None):
     return c
 
 
+def reach(light, dist):
+    """limit how far a light reaches (EEVEE custom distance): inner lamps light the case, not what flies out of it"""
+    if hasattr(light, "use_custom_distance"):
+        light.use_custom_distance = True
+        light.cutoff_distance = dist
+
+
 def snap(obj, frame, mode="EASE_IN", interp="QUAD"):
     """the key that ends at `frame` accelerates into it (a fall, a snap), not an ease"""
     for fc in curves(obj):
@@ -172,7 +179,8 @@ elif variant == "case":
         g = box(f"glow{i}", (CW - 0.04, CL - 0.04, 0.02), (x, 0, HB - 0.31), mat(f"glow{i}", base=(0.02, 0.02, 0.02, 1), metal=0, rough=0.6, coat=0, emit=c, estr=0.0), 0)
         base.append(g); glows.append(g)
         sl = bpy.data.lights.new(f"slot{i}", "POINT"); sl.color = c[:3]; sl.shadow_soft_size = 0.3
-        so = link(bpy.data.objects.new(f"slot{i}", sl)); so.location = (x, 0, HB - 0.12); base.append(so)
+        so = link(bpy.data.objects.new(f"slot{i}", sl)); so.location = (x, 0, HB - 0.26); base.append(so)
+        reach(sl, 0.8)
         glows.append(sl)
     for o in base:
         o.parent = root
@@ -221,7 +229,7 @@ elif variant == "case":
     for i, (c, nm) in enumerate(zip(cols, names)):
         cp = empty(f"cart{i}"); cp.parent = root
         bodyc = box(f"cbody{i}", (0.72, 0.2, 1.06), (0, 0, 0), metal(f"gun{i}", 0.16, 0.32), 0.06, 4); bodyc.parent = cp
-        face = box(f"cface{i}", (0.6, 0.02, 0.92), (0, -0.1, 0), mat(f"cglass{i}", base=(0.01, 0.012, 0.018, 1), metal=0.2, rough=0.12, coat=1.0), 0.03, 3)
+        face = box(f"cface{i}", (0.6, 0.02, 0.92), (0, -0.1, 0), mat(f"cglass{i}", base=(0.01, 0.012, 0.018, 1), metal=0.0, rough=0.26, coat=0.35), 0.03, 3)
         face.parent = cp
         led = box(f"cled{i}", (0.05, 0.02, 0.78), (-0.24, -0.115, 0), mat(f"cled{i}", base=c, metal=0, rough=0.3, coat=0, emit=c, estr=6), 0.02, 2)
         led.parent = cp
@@ -232,7 +240,9 @@ elif variant == "case":
             bar.parent = cp
         carts.append(cp)
     lamp = bpy.data.lights.new("inside", "POINT"); lamp.color = ACC[:3]; lamp.shadow_soft_size = 0.9
-    lo = link(bpy.data.objects.new("inside", lamp)); lo.parent = root; lo.location = (0, -0.3, 1.5)
+    lo = link(bpy.data.objects.new("inside", lamp)); lo.parent = root
+    lo.location = (0, 0.85, HB - 0.08)  # low and behind the slots: below the rim (no blue on the outside), off the cartridges' path
+    reach(lamp, 2.2)
     # framing: lid open, cartridges up
     hinge.rotation_euler = (R(-104), 0, 0)
     for i, cp in enumerate(carts):
@@ -248,14 +258,15 @@ elif variant == "case":
     key(hinge, 1, rotation_euler=(0, 0, 0)); key(hinge, F(0.9), rotation_euler=(0, 0, 0))
     key(hinge, F(1.6), rotation_euler=(R(-110), 0, 0)); key(hinge, F(1.75), rotation_euler=(R(-104), 0, 0))
     ease_all(hinge)
-    for g in glows:  # cut-out floors glow softly, a coloured lamp in each slot lights its walls
+    for n, g in enumerate(glows):  # cut-out floors glow softly; a coloured lamp lights each slot's walls once its cartridge is out
         if isinstance(g, bpy.types.Light):
-            g.energy = 0; g.keyframe_insert("energy", frame=F(1.0)); g.energy = 45; g.keyframe_insert("energy", frame=F(1.7))
+            t0 = 1.75 + (n // 2) * 0.18
+            g.energy = 0; g.keyframe_insert("energy", frame=F(t0 + 0.3)); g.energy = 45; g.keyframe_insert("energy", frame=F(t0 + 0.7))
             continue
         em = bsdf(g.data.materials[0]).inputs["Emission Strength"]
         em.default_value = 0; em.keyframe_insert("default_value", frame=F(1.0))
         em.default_value = 0.35; em.keyframe_insert("default_value", frame=F(1.7))
-    lamp.energy = 0; lamp.keyframe_insert("energy", frame=F(1.0)); lamp.energy = 260; lamp.keyframe_insert("energy", frame=F(1.8))
+    lamp.energy = 0; lamp.keyframe_insert("energy", frame=F(1.0)); lamp.energy = 180; lamp.keyframe_insert("energy", frame=F(1.8))
     for i, cp in enumerate(carts):
         x = (i - 1) * 1.0
         t0 = 1.75 + i * 0.18
