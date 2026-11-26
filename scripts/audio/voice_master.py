@@ -229,7 +229,7 @@ def report(path, target, label, m):
     r = measure(path)
     tol = 1.5 if target is VOICE else 1  # the voice stem only needs headroom; the master is exact
     ok = abs(r["I"] - target["I"]) <= tol and r["TP"] <= target["TP"] + 0.3 and r["LRA"] <= target["LRA"] + 1  # LRA 4–7 is judged on the cut, not on raw takes
-    print(json.dumps({"file": path, "stage": label, "in": {"I": m["input_i"], "LRA": m["input_lra"], "TP": m["input_tp"]},
+    print(json.dumps({"file": _kit.shown(path), "stage": label, "in": {"I": m["input_i"], "LRA": m["input_lra"], "TP": m["input_tp"]},
                       "out": r, "target": target, "ok": ok, "mode": m.get("normalization_type")}, ensure_ascii=False))
 
 
@@ -312,7 +312,7 @@ def analyze(a):
     mean_all = float(re.findall(r"mean_volume: (-?[\d.]+)", sp)[-1])
     snr = round(mean_all - noise, 1) if noise is not None else None
     preset, notes = suggest(dev, snr, pre["I"])
-    rep = {"file": a.inp, "raw": pre, "noise_db": noise, "speech_over_noise_db": snr, "room_tone_s": tone,
+    rep = {"file": _kit.shown(a.inp), "raw": pre, "noise_db": noise, "speech_over_noise_db": snr, "room_tone_s": tone,
            "tone_vs_average_voice_db": dev, "suggested": {a.name: preset}, "notes": notes, "_speech_band_peak": speech}
     print(json.dumps(rep, ensure_ascii=False, indent=1))
     print("\nВставьте «suggested» в kit.config.json → «voicePresets», затем:\n"
@@ -370,7 +370,7 @@ def match(a):
         preset["denoise"] = a.denoise
         preset["chain"] += "," + EXPANDER
     rms = (sum(g * g for _, g in curve) / len(curve)) ** 0.5
-    print(json.dumps({"file": a.inp, "reference": a.ref, "curve_rms_db": round(rms, 2), "suggested": {a.name: preset}}, ensure_ascii=False, indent=1))
+    print(json.dumps({"file": _kit.shown(a.inp), "reference": _kit.shown(a.ref), "curve_rms_db": round(rms, 2), "suggested": {a.name: preset}}, ensure_ascii=False, indent=1))
     print("\nВставьте «suggested» в kit.config.json → «voicePresets» и сравните на слух с эталоном (docs/MIC_CALIBRATION.md).", file=sys.stderr)
     return curve
 

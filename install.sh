@@ -99,7 +99,7 @@ fi
 
 # --- 2. npm
 say "2/5 Пакеты Node (Remotion)"
-npm install --no-audit --no-fund
+npm install --no-audit --no-fund --no-update-notifier
 ok "node_modules"
 
 # --- 3. модель Whisper

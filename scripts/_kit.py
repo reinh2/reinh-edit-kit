@@ -28,6 +28,17 @@ def cfg():
     return out
 
 
+def shown(p):
+    """a path for the screen: relative inside the current folder, ~/… in the home folder, the bare name for temp files"""
+    p = os.path.abspath(p)
+    cwd, home = os.getcwd(), os.path.expanduser("~")
+    if p.startswith(cwd + os.sep):
+        return os.path.relpath(p, cwd)
+    if p.startswith(home + os.sep):
+        return "~" + p[len(home):]
+    return os.path.basename(p)
+
+
 def path(p):
     """A config path relative to the repository root, unless it is absolute."""
     return p if os.path.isabs(p) else os.path.join(ROOT, p)

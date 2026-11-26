@@ -19,7 +19,8 @@ OUT = os.path.join(ROOT, "public", "example")
 
 
 def sh(*cmd, **kw):
-    print("→", " ".join(cmd[:4]), "…", flush=True)
+    shown = ["python3" if c == sys.executable else _kit.shown(c) if os.path.isabs(c) else c for c in cmd[:4]]
+    print("→", " ".join(shown), "…", flush=True)
     return subprocess.run(cmd, check=True, cwd=ROOT, **kw)
 
 
