@@ -13,7 +13,7 @@ for d in .claude/skills .agents/skills; do
     if [ "$dest" = "$kit" ]; then ln -sfn "../../skills/$n" "$dest/$d/$n"; else ln -sfn "$s" "$dest/$d/$n"; fi
   done
 done
-echo "Скиллы набора подключены в $dest (.claude/skills, .agents/skills)."
+echo "Скиллы набора подключены в ${dest/#$HOME/~} (.claude/skills, .agents/skills)."
 echo
 echo "Официальные скиллы (ставятся отдельно, от их авторов):"
 echo "  npx skills add remotion-dev/skills      # Remotion: анимации, субтитры, рендер"

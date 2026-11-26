@@ -43,13 +43,14 @@ if [ -f "$HERE/package.json" ] && grep -q '"reinh-edit-kit"' "$HERE/package.json
   KIT="$HERE"
 else
   has git || { echo "Нужен git: macOS - xcode-select --install, Linux - sudo apt install git"; exit 1; }
-  if [ -d "$DIR/.git" ]; then say "Набор уже скачан: $DIR (обновляю)"; git -C "$DIR" pull --ff-only || true
-  else say "Скачиваю набор в $DIR"; git clone --depth 1 "$REPO" "$DIR"; fi
+  if [ -d "$DIR/.git" ]; then say "Набор уже скачан: ${DIR/#$HOME/~} (обновляю)"; git -C "$DIR" pull --ff-only || true
+  else say "Скачиваю набор в ${DIR/#$HOME/~}"; mkdir -p "$(dirname "$DIR")"; (cd "$(dirname "$DIR")" && git clone --depth 1 "$REPO" "$(basename "$DIR")"); fi
   KIT="$DIR"
 fi
 cd "$KIT"
+SHOW="${KIT/#$HOME/~}"  # the folder as ~/… on screen (no user name)
 OS="$(uname -s)"
-echo "Reinh Edit Kit → $KIT ($OS)"
+echo "Reinh Edit Kit → $SHOW ($OS)"
 
 # --- 1. системные программы (только недостающие)
 if [ "$DEPS" = 1 ]; then
@@ -122,8 +123,8 @@ if [ "$TEST" = 1 ]; then npm test || warn "часть тестов не прош
 
 say "Готово"
 cat <<EOF
-  Папка набора:      $KIT
-  Посмотреть пример: cd "$KIT" && npm run render:example   (черновики в out/)
+  Папка набора:      $SHOW
+  Посмотреть пример: cd $SHOW && npm run render:example   (черновики в out/)
   Предпросмотр:      npm run studio
   Ваши настройки:    kit.config.json и YOUR_RULES.md
   Ваш микрофон:      python3 scripts/audio/voice_master.py analyze проба.wav
