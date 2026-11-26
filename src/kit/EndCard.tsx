@@ -7,7 +7,7 @@ import { ease, lerp, prog } from "./motion";
 import { Sfx } from "./sfx";
 import { C, FONT, KIT, PAGE_BG, shadow } from "./theme";
 
-// Lucide-style icons (ISC licence), 24 × 24, stroke. Generic glyphs only — never a platform's logo.
+// Lucide icons (ISC licence, licenses/Lucide-LICENSE.txt), 24 × 24, stroke. Generic glyphs only — never a platform's logo.
 const ICONS: Record<string, string[]> = {
   channel: ["M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z", "m21.854 2.147-10.94 10.939"],
   globe: ["M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z", "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20", "M2 12h20"],

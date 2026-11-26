@@ -2,7 +2,7 @@
 """Scratch voice-over for the promo (src/promo/script.json): one synthetic line per scene (macOS `say`, else espeak-ng),
 processed with voice_master (preset neutral) → public/promo/vo_<id>.wav + public/promo/vo.json (durations).
 Only for pacing the draft: the final voice-over is recorded by a person. Files stay local (public/promo is ignored)."""
-import json, os, shutil, subprocess, sys, tempfile
+import argparse, json, os, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, "public", "promo")
@@ -13,6 +13,7 @@ def dur(p):
 
 
 def main():
+    argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
     os.makedirs(OUT, exist_ok=True)
     S = json.load(open(os.path.join(ROOT, "src", "promo", "script.json")))["scenes"]
     tmp = tempfile.mkdtemp()

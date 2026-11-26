@@ -7,6 +7,10 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const SR = 48000;
+if (process.argv[2]?.startsWith("-")) {
+  console.log("Usage: node scripts/audio/sfx-synth-v2.mjs [OUT_DIR]   (default public/sfx/v2): writes the synthesised SFX pack as WAV");
+  process.exit(process.argv[2] === "--help" || process.argv[2] === "-h" ? 0 : 2);
+}
 const OUT = process.argv[2] ?? "public/sfx/v2";
 mkdirSync(OUT, { recursive: true });
 

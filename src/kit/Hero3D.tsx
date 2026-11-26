@@ -3,15 +3,26 @@
 // frames (Blender not installed or not rendered yet) it shows a soft glow placeholder, so the film still renders.
 // loop: repeat (turntables); otherwise the last frame holds. Load meta.json with loadHeroMeta() in calculateMetadata.
 import React from "react";
-import { Img, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { getStaticFiles, Img, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { clamp01, ease, lerp, prog } from "./motion";
 
 export type HeroMeta = { frames: number; fps: number; width: number; height: number };
 
-export const loadHeroMeta = async (dir: string): Promise<HeroMeta | null> => {
-  const r = await fetch(staticFile(`${dir}/meta.json`)).catch(() => null);
-  return r && r.ok ? ((await r.json()) as HeroMeta) : null;
+// optional JSON from public/: null when the file is not there. Checks the list of public files first, so a missing
+// optional file (no 3D renders, no scratch voice) does not print «404 Not Found» in the render log
+export const loadOptionalJson = async <T,>(name: string): Promise<T | null> => {
+  let files: { name: string }[] = [];
+  try {
+    files = getStaticFiles();
+  } catch {
+    files = [];
+  }
+  if (files.length && !files.some((f) => f.name === name)) return null;
+  const r = await fetch(staticFile(name)).catch(() => null);
+  return r && r.ok ? ((await r.json()) as T) : null;
 };
+
+export const loadHeroMeta = (dir: string) => loadOptionalJson<HeroMeta>(`${dir}/meta.json`);
 
 export const Hero3D: React.FC<{ dir: string; meta: HeroMeta | null; style: React.CSSProperties; loop?: boolean; delay?: number; fadeIn?: number; glow?: string }> = ({ dir, meta, style, loop, delay = 0, fadeIn = 0.25, glow = "rgba(160,190,255,0.45)" }) => {
   const frame = useCurrentFrame();

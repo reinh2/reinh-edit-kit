@@ -280,7 +280,7 @@ def main():
     for s, f in flags:
         print(f"  FLAG {hms(s['t'])} {s['kind']:6} {s['piece']}: {f}")
     if a.report:
-        L = [f"# Editorial check — {os.path.basename(a.edl)}", "", f"Total {hms(tl['totalSec'])}. Shots: {len(rows)}, flags: {len(flags)}.",
+        L = [f"# Editorial check - {os.path.basename(a.edl)}", "", f"Total {hms(tl['totalSec'])}. Shots: {len(rows)}, flags: {len(flags)}.",
              f"Limits: face ≤ {LIMITS['face']:.0f} s, screen framing ≤ {LIMITS['screen']:.0f} s (wide ≤ {LIMITS['screen_wide']:.0f} s), shot ≥ {LIMITS['min']} s; slow push counts as motion.", "",
              "| # | out | len | shot | piece | flag |", "|---|---|---|---|---|---|"]
         for i, (s, f) in enumerate(rows):
@@ -290,7 +290,7 @@ def main():
         fps = tl["fps"]
         L += ["", "## Clips (source → output)", "", "| out in | out out | piece | source (recording @ s) | len |", "|---|---|---|---|---|"]
         for c in tl["audio"]:
-            L.append(f"| {hms(c['from']/fps)} | {hms((c['from']+c['dur'])/fps)} | {c['piece']} | {c.get('obs','cine')} @ {c.get('srcIn','')}–{c.get('srcOut','')} | {c['dur']/fps:.2f} |")
+            L.append(f"| {hms(c['from']/fps)} | {hms((c['from']+c['dur'])/fps)} | {c['piece']} | {c.get('obs','cine')} @ {c.get('srcIn','')}-{c.get('srcOut','')} | {c['dur']/fps:.2f} |")
         open(a.report, "w").write("\n".join(L) + "\n")
     sys.exit(0)
 

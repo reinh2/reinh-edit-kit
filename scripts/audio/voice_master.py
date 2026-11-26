@@ -176,9 +176,9 @@ def voice(a):
         if tone:
             chain.append(f"asendcmd=c='{tone[0]:.2f} afftdn sn start;{tone[1]:.2f} afftdn sn stop',"
                          f"afftdn=nr={P['denoise']}:nf=-70:rf=-80:gs=8:tn=0")
-            print(f"noise profile from {tone[0]:.2f}–{tone[1]:.2f} s", file=sys.stderr)
+            print(f"noise profile from {tone[0]:.2f}-{tone[1]:.2f} s", file=sys.stderr)
         else:
-            print("no room tone ≥ 0.4 s found: profile denoise skipped (record 2–3 s of silence, or pass --noise)",
+            print("no room tone ≥ 0.4 s found: profile denoise skipped (record 2-3 s of silence, or pass --noise)",
                   file=sys.stderr)
     elif a.denoise:
         chain.append("afftdn=nr=8:nf=-55:tn=1")
@@ -278,7 +278,7 @@ def suggest(dev, snr, raw):
     chain = [f"highpass=f={hp}", *eq, COMP.format(r=2.5)]
     if deess:
         chain.append("deesser=i=0.3:m=0.5:f=0.5")
-    preset = {"pre_lufs": -29, "chain": ",".join(chain), "note": "suggested by analyze — check by ear"}
+    preset = {"pre_lufs": -29, "chain": ",".join(chain), "note": "suggested by analyze - check by ear"}
     if snr is None:
         notes.append("в записи нет паузы ≥ 0.8 с: шум не измерен; запишите 2-3 с тишины")
     elif snr < 20:
@@ -365,7 +365,7 @@ def match(a):
     ref = third_octave(a.ref, "pan=mono|c0=c0", pr["I"])
     curve = match_curve(src, ref, amount=a.amount)
     preset = {"pre_lufs": -30, "match": curve, "chain": "highpass=f=70," + TWO_STAGE + "," + DYN_DEESS,
-              "note": f"EQ match to {os.path.basename(a.ref)} ({int(a.amount * 100)} %) — check by ear"}
+              "note": f"EQ match to {os.path.basename(a.ref)} ({int(a.amount * 100)} %) - check by ear"}
     if a.denoise:
         preset["denoise"] = a.denoise
         preset["chain"] += "," + EXPANDER

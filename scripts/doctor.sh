@@ -11,7 +11,7 @@ check python3 "python3 --version" "$(inst python python3) (нужен 3.10+)"
 check node "node --version" "https://nodejs.org (20.19+ или 22.13+)"
 check whisper-cli "echo whisper.cpp" "$(inst whisper-cpp whisper-cpp) или сборка https://github.com/ggml-org/whisper.cpp"
 check auto-editor "auto-editor --version" "необязательно: pip install auto-editor"
-if command -v blender >/dev/null 2>&1 || [ -x /Applications/Blender.app/Contents/MacOS/Blender ]; then echo "✓ blender (3D-герои)"; else echo "• blender не найден - нужен только для 3D-героев: https://www.blender.org"; fi
+if b=$(bash scripts/blender/blender.sh --find); then echo "✓ blender (3D-герои): $b"; else echo "• blender не найден - нужен только для 3D-героев: https://www.blender.org"; fi
 model=$(python3 -c "import sys; sys.path.insert(0,'scripts'); import _kit; print(_kit.path(_kit.cfg()['whisperModel']))")
 if [ -f "$model" ]; then echo "✓ модель Whisper: $model"; else echo "✗ модель Whisper: $model - bash scripts/get_model.sh"; ok=1; fi
 [ -d node_modules ] && echo "✓ node_modules" || { echo "✗ node_modules - npm install"; ok=1; }

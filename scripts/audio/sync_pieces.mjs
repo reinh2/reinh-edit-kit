@@ -8,6 +8,10 @@ import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 const pcm = (f, sr = 16000) => { const b = execFileSync("ffmpeg", ["-v", "error", "-i", f, "-vn", "-ac", "1", "-ar", String(sr), "-f", "f32le", "-"], { maxBuffer: 1 << 30 }); return new Float32Array(b.buffer, b.byteOffset, b.length / 4); };
 const [clipF, longF, outF, ...offs] = process.argv.slice(2);
+if (!clipF || !longF || !outF || !offs.length || clipF.startsWith("-")) {
+  console.log("Usage: node scripts/audio/sync_pieces.mjs CLIP LONG OUT.wav OFF1 OFF2 ...\n  OFFn - candidate offsets (s) of clip time 0 in LONG, found with find_offset.mjs; writes OUT.wav and OUT.json");
+  process.exit(clipF === "--help" || clipF === "-h" ? 0 : 2);
+}
 const cands = offs.map(Number);
 const a = pcm(clipF), b = pcm(longF), SR = 16000;
 const corr = (ca, cb, n) => { let s = 0, x = 0, y = 0; for (let i = 0; i < n; i += 2) { s += a[ca + i] * b[cb + i]; x += a[ca + i] ** 2; y += b[cb + i] ** 2; } return x < 1e-6 ? 0 : s / Math.sqrt(x * y + 1e-12); };

@@ -7,7 +7,7 @@
 #            folding handle, back hinge, egg-crate foam in the lid, pluck foam with cut-outs in the base. The latches
 #            flip (0.45 s), the lid opens (0.9–1.6 s), light comes up from the cut-outs and three drive cartridges
 #            rise out (skills · scripts · styles) and hover; 6 s
-# Usage: blender -b -P scripts/blender/promo_heroes.py -- clapper|case [--out DIR] [--still N]
+# Usage: bash scripts/blender/blender.sh -b -P scripts/blender/promo_heroes.py -- clapper|case [--out DIR] [--still N]
 #        npm run promo:3d   (both into public/promo3d/<name>/). The microphones of step 2 are real models: mics.py
 import math, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

@@ -59,7 +59,7 @@ const Fit: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
-// drawn line icons (24 × 24)
+// line icons (24 × 24): drawn for the kit; send, mic and user follow Lucide (ISC, licenses/Lucide-LICENSE.txt)
 const IC: Record<string, string> = {
   film: "M4 4h16v16H4z M8 4v16 M16 4v16 M4 8h4 M4 12h4 M4 16h4 M16 8h4 M16 12h4 M16 16h4",
   scissors: "M6 6.5a2.5 2.5 0 1 0 0 .01 M6 17.5a2.5 2.5 0 1 0 0 .01 M8 8l12 9 M8 16l12-9",

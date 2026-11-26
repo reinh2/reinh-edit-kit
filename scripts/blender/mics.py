@@ -6,7 +6,7 @@
 #   dji       DJI Mic Mini 2 — wireless lav: pebble transmitter with a magnetic cover and clip + the receiver
 #   podmic    Rode PodMic — end-address dynamic: chunky black body, grille head, swing mount with a knob
 #   lineup    all five in a row, one still (README / comparison board)
-# Usage: blender -b -P scripts/blender/mics.py -- sm7b [--out DIR] [--still N] [--frames N]
+# Usage: bash scripts/blender/blender.sh -b -P scripts/blender/mics.py -- sm7b [--out DIR] [--still N] [--frames N]
 #        npm run mics:3d   (all five turntables into public/mics3d/<name>/)
 import math, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -225,13 +225,15 @@ if variant == "lineup":
     s = reset(30, 1, (2400, 900), samples=48)
     studio(key=900, rim=1600)
     bright_world()
-    roots = []
-    for i, name in enumerate(["yeti", "solocast", "sm7b", "podmic", "dji"]):
+    roots, x = [], 0.0
+    for name in ["yeti", "solocast", "sm7b", "podmic", "dji"]:
         r = empty(f"root_{name}")
         ang = BUILD[name](r)
         r.rotation_euler = (0, 0, ang)
-        normalize(r, 2.4 if name not in ("dji",) else 1.6)
-        r.location.x += (i - 2) * 3.4
+        normalize(r, 1.6 if name == "dji" else 2.4, by="max")  # SM7B and PodMic lie on their side: fit the long side
+        lo, hi = bounds(r)
+        r.location.x += x - lo.x  # side by side with an even gap, no overlaps
+        x += (hi.x - lo.x) + 0.9
         roots.append(r)
     auto_camera(roots, (2400, 900), lens=60, margin=1.05, tilt=8)
     render(out, still if still is not None else 1)

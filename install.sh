@@ -28,10 +28,13 @@ say() { printf '\n\033[1;34m==>\033[0m \033[1m%s\033[0m\n' "$*"; }
 ok() { printf '  \033[32m✓\033[0m %s\n' "$*"; }
 warn() { printf '  \033[33m!\033[0m %s\n' "$*"; }
 has() { command -v "$1" >/dev/null 2>&1; }
-ask() { # ask "вопрос" → 0 (да) / 1 (нет); с --yes всегда да; без терминала - нет
+names() { local n out=(); for n in "$@"; do case $n in whisper) out+=("whisper.cpp") ;; node) out+=("Node.js") ;; *) out+=("$n") ;; esac; done; echo "${out[*]}"; }
+ask() { # ask "вопрос" → 0 (да) / 1 (нет); с --yes всегда да; без терминала (CI, агент) - нет
   [ "$YES" = 1 ] && return 0
-  [ -r /dev/tty ] || return 1
-  printf '  %s [y/N] ' "$1" > /dev/tty; read -r a < /dev/tty; [ "$a" = y ] || [ "$a" = Y ] || [ "$a" = д ] || [ "$a" = Д ]
+  local a=""
+  { printf '  %s [y/N] ' "$1" > /dev/tty; } 2>/dev/null || { echo "  $1 - нет терминала для ответа, считаю «нет» (или запустите с --yes)"; return 1; }
+  read -r a < /dev/tty || true  # Ctrl+D = «нет»
+  [ "$a" = y ] || [ "$a" = Y ] || [ "$a" = д ] || [ "$a" = Д ]
 }
 
 # --- 0. где мы: в папке набора или запуск через curl
@@ -54,9 +57,9 @@ if [ "$DEPS" = 1 ]; then
   need=()
   has ffmpeg || need+=(ffmpeg)
   has whisper-cli || need+=(whisper)
-  if has node; then
-    major=$(node -p 'process.versions.node.split(".")[0]')
-    [ "$major" -ge 20 ] || { warn "Node.js $(node -v) слишком старый (нужен 20+)"; need+=(node); }
+  if has node; then  # Remotion: Node ^20.19, ^22.13 или 24+
+    node -e 'const [a,b]=process.versions.node.split(".").map(Number); process.exit((a===20&&b>=19)||(a===22&&b>=13)||a>=24?0:1)' \
+      || { warn "Node.js $(node -v) не подходит (нужен 20.19+, 22.13+ или 24+)"; need+=(node); }
   else need+=(node); fi
   has python3 || need+=(python)
   if [ ${#need[@]} -eq 0 ]; then ok "всё уже установлено"
@@ -66,7 +69,7 @@ if [ "$DEPS" = 1 ]; then
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         [ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
         [ -x /usr/local/bin/brew ] && eval "$(/usr/local/bin/brew shellenv)"
-      else echo "Без Homebrew поставьте вручную: ${need[*]}. Потом запустите install.sh снова."; exit 1; fi
+      else echo "Без Homebrew поставьте вручную: $(names "${need[@]}"). Потом запустите install.sh снова."; exit 1; fi
     fi
     pk=()
     for n in "${need[@]}"; do case $n in whisper) pk+=(whisper-cpp) ;; *) pk+=("$n") ;; esac; done
@@ -77,7 +80,7 @@ if [ "$DEPS" = 1 ]; then
       case $n in
         ffmpeg) sudo apt-get install -y ffmpeg ;;
         python) sudo apt-get install -y python3 ;;
-        node) warn "Node.js 20+: https://nodejs.org или nvm (apt часто даёт старую версию)"; sudo apt-get install -y nodejs npm || true ;;
+        node) warn "Node.js 22.13+ или 24+: https://nodejs.org или nvm (apt часто даёт старую версию)"; sudo apt-get install -y nodejs npm || true ;;
         whisper)
           sudo apt-get install -y git cmake build-essential
           src="$HOME/.local/src/whisper.cpp"; mkdir -p "$HOME/.local/src" "$HOME/.local/bin"
@@ -88,7 +91,7 @@ if [ "$DEPS" = 1 ]; then
       esac
     done
   else
-    echo "Не знаю менеджер пакетов этой системы. Поставьте вручную: ${need[*]} (docs/HARDWARE.md)"; exit 1
+    echo "Не знаю менеджер пакетов этой системы. Поставьте вручную: $(names "${need[@]}") (docs/HARDWARE.md)"; exit 1
   fi
   for c in ffmpeg node python3 whisper-cli; do has "$c" && ok "$c" || warn "$c не найден"; done
 fi

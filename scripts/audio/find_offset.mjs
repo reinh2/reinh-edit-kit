@@ -5,6 +5,10 @@ import { execFileSync } from "node:child_process";
 const pcm = (f) => { const b = execFileSync("ffmpeg", ["-v", "error", "-i", f, "-vn", "-ac", "1", "-ar", "16000", "-f", "f32le", "-"], { maxBuffer: 1 << 30 }); return new Float32Array(b.buffer, b.byteOffset, b.length / 4); };
 const env = (x, hop = 80) => { const n = Math.floor(x.length / hop), e = new Float32Array(n); for (let i = 0; i < n; i++) { let s = 0; for (let j = 0; j < hop; j++) s += Math.abs(x[i * hop + j]); e[i] = Math.log(1e-4 + s / hop); } let m = 0; for (const v of e) m += v; m /= n; let sd = 0; for (let i = 0; i < n; i++) { e[i] -= m; sd += e[i] * e[i]; } sd = Math.sqrt(sd / n) || 1; for (let i = 0; i < n; i++) e[i] /= sd; return e; };
 const [clipF, longF] = process.argv.slice(2);
+if (!clipF || !longF || clipF.startsWith("-")) {
+  console.log("Usage: node scripts/audio/find_offset.mjs CLIP LONG\n  finds where the audio of CLIP sits inside LONG; prints the offset (s) and confidence as JSON");
+  process.exit(clipF === "--help" || clipF === "-h" ? 0 : 2);
+}
 const a = pcm(clipF), b = pcm(longF);
 const ea = env(a), eb = env(b);
 let best = -1e9, lag = 0, second = -1e9;

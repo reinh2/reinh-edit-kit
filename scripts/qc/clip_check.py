@@ -42,5 +42,5 @@ for i, c in enumerate(tl["audio"]):
     txt = open(w + ".txt").read().strip().replace("\n", " ") if os.path.exists(w + ".txt") else ""
     e = [rms(src, s0 - 0.04, 0.04), rms(src, s0, 0.04), rms(src, s0 + d - 0.04, 0.04), rms(src, s0 + d, 0.04)]
     warn = " ⚠ edge" if e[0] > -40 or e[3] > -40 else ""
-    print(f"{i:02d} {c['piece']}:{c.get('clip', 0)} @{c['from'] / fps:7.2f}s local {s0 - a.handle:.2f}–{s0 - a.handle + d:.2f} "
+    print(f"{i:02d} {c['piece']}:{c.get('clip', 0)} @{c['from'] / fps:7.2f}s local {s0 - a.handle:.2f}-{s0 - a.handle + d:.2f} "
           f"edges[before {e[0]} | in {e[1]} … out {e[2]} | after {e[3]}]{warn} | {txt}", flush=True)

@@ -4,6 +4,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 name="${1:-small}"
+case "$name" in
+  tiny|base|small|medium|large-v3|large-v3-turbo|tiny.en|base.en|small.en|medium.en) ;;
+  -h|--help) echo "Usage: bash scripts/get_model.sh [small|medium|large-v3-turbo|large-v3|base|tiny]   (default small)"; exit 0 ;;
+  *) echo "Неизвестная модель: $name. Есть: tiny, base, small, medium, large-v3, large-v3-turbo (и .en для английского)"; exit 2 ;;
+esac
 mkdir -p models
 url="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-${name}.bin"
 echo "Скачиваю $url → models/ggml-${name}.bin"

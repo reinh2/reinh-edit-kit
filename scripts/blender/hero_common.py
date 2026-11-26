@@ -1,6 +1,6 @@
 # Shared helpers for 3D «heroes»: procedural Blender scenes rendered headless to a transparent PNG sequence that Remotion
 # plays over any background (src/kit/Hero3D.tsx). Look of the cine style: dark glossy glass, chrome, ice-blue rims.
-# Run a scene:  blender -b -P scripts/blender/<scene>.py -- <variant> [--out DIR] [--still FRAME]
+# Run a scene:  bash scripts/blender/blender.sh -b -P scripts/blender/<scene>.py -- <variant> [--out DIR] [--still FRAME]
 # Rules from real videos: 1–3 heroes per long video, where the thought is an object (a tool, a device, a box);
 # animation beats = spoken words; everything is generated here, so the renders are yours (no downloaded models).
 import json, math, os, sys
@@ -262,10 +262,12 @@ def bounds(root):
     return lo, hi
 
 
-def normalize(root, height=2.4):
-    """scale so the object stands `height` tall with its base on z = 0, centred in x/y"""
+def normalize(root, height=2.4, by="height"):
+    """scale so the object stands `height` tall (by="max": its longest side, for objects lying on their side) with its
+    base on z = 0, centred in x/y"""
     lo, hi = bounds(root)
-    k = height / max(hi.z - lo.z, 1e-6)
+    d = hi - lo
+    k = height / max(max(d.x, d.y, d.z) if by == "max" else d.z, 1e-6)
     root.scale = (k, k, k)
     bpy.context.view_layer.update()
     lo, hi = bounds(root)

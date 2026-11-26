@@ -7,7 +7,7 @@
 | Шрифт Inter (подмножества кириллица + латиница) | `public/fonts/inter-*.woff2` | SIL Open Font License 1.1, `public/fonts/Inter-OFL.txt` |
 | Шрифт JetBrains Mono (подмножества) | `public/fonts/jbmono-*.woff2` | SIL Open Font License 1.1, `public/fonts/JetBrainsMono-OFL.txt` |
 | Шрифт Oswald (подмножества) | `public/fonts/oswald-*.woff2` | SIL Open Font License 1.1, `public/fonts/Oswald-OFL.txt` |
-| Значки в `EndCard` | `src/kit/EndCard.tsx` | по мотивам Lucide, ISC |
+| Значки Lucide: все в `EndCard`, в промо - `send`, `mic`, `user` (остальные нарисованы для набора) | `src/kit/EndCard.tsx`, `src/promo/Promo.tsx` | ISC, `licenses/Lucide-LICENSE.txt` |
 
 Ставятся отдельно и **не входят** в репозиторий:
 | Что | Лицензия | Важно |

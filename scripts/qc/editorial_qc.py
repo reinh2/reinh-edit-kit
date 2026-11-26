@@ -193,10 +193,10 @@ def main():
     F.sort(key=lambda f: f["t0"])
     json.dump({"video": a.video, "duration": dur, "findings": F}, open(a.out + ".json", "w"), ensure_ascii=False, indent=1)
     open_f = [f for f in F if not f["allowed"]]
-    md = [f"# Editorial QC — {a.video}", "", f"Duration {hms(dur)}. Findings: {len(F)}, open: {len(open_f)}.", "",
+    md = [f"# Editorial QC - {a.video}", "", f"Duration {hms(dur)}. Findings: {len(F)}, open: {len(open_f)}.", "",
           "| time | kind | value | note | decision |", "|---|---|---|---|---|"]
     for f in F:
-        md.append(f"| {hms(f['t0'])}–{hms(f['t1'])} | {f['kind']} | {f['value']} | {f['note']} | {f['allowed'] or 'OPEN'} |")
+        md.append(f"| {hms(f['t0'])}-{hms(f['t1'])} | {f['kind']} | {f['value']} | {f['note']} | {f['allowed'] or 'OPEN'} |")
     open(a.out + ".md", "w").write("\n".join(md) + "\n")
     print("\n".join(md))
     sys.exit(1 if open_f else 0)

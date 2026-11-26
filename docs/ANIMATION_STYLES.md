@@ -52,9 +52,10 @@
 1. **Сцена - скрипт Python для Blender**, без скачанных моделей: всё строится из примитивов, поэтому рендер ваш. Общие функции (свет студии, стекло, хром, полосы, фактура пластика, 3D-текст шрифтами набора, автокамера, рендер) - `scripts/blender/hero_common.py`; примеры - `scripts/blender/promo_heroes.py` (хлопушка с полями «сцена» и «дубль» щёлкает на склейке; кейс для техники - защёлки, ручка, поролон - открывается, и из прорезей поднимаются три накопителя: скиллы, скрипты, стили) и `scripts/blender/mics.py` - пять популярных микрофонов по реальным формам и пропорциям, без логотипов: Shure SM7B, Blue Yeti, HyperX SoloCast, DJI Mic Mini 2 (передатчик и приёмник), Rode PodMic (`npm run mics:3d`, плюс общий кадр `lineup`).
 2. **Рендер без окна** в PNG с прозрачным фоном, 30 fps:
    ```bash
-   blender -b -P scripts/blender/mics.py -- sm7b             # → public/mics3d/sm7b/0001.png … + meta.json
-   blender -b -P scripts/blender/mics.py -- sm7b --still 75  # один кадр для проверки
+   bash scripts/blender/blender.sh -b -P scripts/blender/mics.py -- sm7b             # → public/mics3d/sm7b/0001.png … + meta.json
+   bash scripts/blender/blender.sh -b -P scripts/blender/mics.py -- sm7b --still 75  # один кадр для проверки
    ```
+   `blender.sh` находит Blender сам: команда `blender`, `Blender.app` с blender.org или путь из переменной `BLENDER`.
 3. **В Remotion** - `Hero3D` (`src/kit/Hero3D.tsx`): играет последовательность поверх любого фона и в любом стиле, `loop` - для поворотного стола. Без отрендеренных кадров показывает мягкое свечение, ролик всё равно собирается.
 
 Реальные вещи (микрофон, камера, телефон) строятся по фотографиям и размерам производителя, но **без логотипов и надписей**: узнаётся форма, бренд - только текстом рядом, если он нужен по смыслу.

@@ -56,7 +56,9 @@ npx skills add WyattBlue/auto-editor
 | `scripts/qc/` | `editorial_qc.py`, `ghost_frames.py`, `cut_strips.py`, `clip_check.py` |
 | `scripts/audio/` | `voice_master.py`, `mix_bed.py`, `find_offset.mjs`, `sync_pieces.mjs`, `sfx-synth-v*.mjs` |
 | `scripts/captions/`, `scripts/ref/` | `make_srt.py`; `contact_sheet.sh`, `scene_scan.sh` |
-| `src/kit/` | компоненты Remotion: `themes` (light / cine), `cine`, `chapter`, `ScreenCam`, `Captions`, `EndCard`, `Card`, `sfx`, `words` |
+| `scripts/blender/` | 3D-герои: `hero_common.py` (общие функции), `promo_heroes.py` (хлопушка, кейс), `mics.py` (пять микрофонов), `blender.sh` (находит Blender) |
+| `scripts/example/` | `make_sample.py` (пример исходников на синтетике), `make_promo_vo.py` (черновой закадр промо для темпа) |
+| `src/kit/` | компоненты Remotion: `themes` (light / cine), `cine`, `chapter`, `ScreenCam`, `Captions`, `EndCard`, `Card`, `Hero3D` (3D-герои), `motion` (плавности), `fonts`, `sfx`, `words` |
 | `src/promo/` | промо-ролик набора в трёх вариантах стиля - живой пример |
 | `docs/` | [конвейер](docs/PIPELINE.md), [стандарт монтажа](docs/EDIT_STANDARD.md), [профили выдачи](docs/DELIVERY_PROFILES.md), [музыка и звуки](docs/MUSIC_AND_SFX.md) |
 | `examples/edl/` | пример EDL |
