@@ -220,53 +220,6 @@ def build_podmic(root):
 BUILD = {"sm7b": build_sm7b, "yeti": build_yeti, "solocast": build_solocast, "dji": build_dji, "podmic": build_podmic}
 
 
-# ---------------------------------------------------------------- framing helpers
-def bounds(root):
-    bpy.context.view_layer.update()
-    pts = []
-    for o in [c for c in root.children_recursive if c.type == "MESH"]:
-        pts += [o.matrix_world @ Vector(c) for c in o.bound_box]
-    lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
-    hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
-    return lo, hi
-
-
-def normalize(root, height=2.4):
-    """scale so the object stands `height` tall with its base on z = 0, centred in x/y"""
-    lo, hi = bounds(root)
-    k = height / max(hi.z - lo.z, 1e-6)
-    root.scale = (k, k, k)
-    bpy.context.view_layer.update()
-    lo, hi = bounds(root)
-    c = (lo + hi) / 2
-    root.location = (root.location.x - c.x, root.location.y - c.y, root.location.z - lo.z)
-
-
-def auto_camera(roots, res, lens=70, margin=1.08, tilt=10, swing=0.0):
-    """fit the box of `roots` by width and height (sensor fit AUTO: 36 mm on the long side); `swing` (rad) widens the
-    width for a turntable"""
-    lo = Vector((1e9, 1e9, 1e9)); hi = -lo
-    for r in roots:
-        a_, b_ = bounds(r)
-        lo = Vector(map(min, lo, a_)); hi = Vector(map(max, hi, b_))
-    c = (lo + hi) / 2
-    w = max(hi.x - lo.x, hi.y - lo.y) if swing else hi.x - lo.x
-    h, depth = hi.z - lo.z, hi.y - lo.y
-    long_ = 18 / lens
-    hf = 2 * math.atan(long_ * (1 if res[0] >= res[1] else res[0] / res[1]))
-    vf = 2 * math.atan(long_ * (1 if res[1] >= res[0] else res[1] / res[0]))
-    d = (max((w / 2) / math.tan(hf / 2), (h / 2) / math.tan(vf / 2)) + depth / 2) * margin
-    t = math.radians(tilt)
-    camera((c.x, c.y - d * math.cos(t), c.z + d * math.sin(t)), (c.x, c.y, c.z), lens)
-
-
-def bright_world(strength=0.9):
-    """soft grey studio sky: metals reflect light instead of the dark default; invisible (transparent film)"""
-    bg = next(n for n in bpy.context.scene.world.node_tree.nodes if n.type == "BACKGROUND")
-    bg.inputs[0].default_value = (0.55, 0.58, 0.64, 1)
-    bg.inputs[1].default_value = strength
-
-
 # ---------------------------------------------------------------- scenes
 if variant == "lineup":
     s = reset(30, 1, (2400, 900), samples=48)

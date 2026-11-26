@@ -4,8 +4,8 @@
 //   light — every scene light (white cards, Inter, one accent);
 //   cine  — every scene cine (dark navy, glass, chrome back words, grain);
 //   mix   — big moments cine (hook, inside, styles, limits, ending), the four guide steps light — like a real long video;
-// a light leak covers every scene change. 3D heroes (Blender, `npm run promo:3d`): a clapperboard snaps on the cut in the hook,
-// a studio mic turns in step 2, the kit case opens at the end; without renders the scenes keep their flat layout. Authored on a 1920×1080 grid and scaled (Fit).
+// a light leak covers every scene change. 3D heroes (Blender, `npm run promo:3d`): a film slate snaps on the cut in the hook,
+// five real microphones take turns in step 2, the kit's equipment case opens at the end; without renders the scenes keep their flat layout. Authored on a 1920×1080 grid and scaled (Fit).
 // Voice-over text: src/promo/script.json; scratch synthetic voice for pacing: `npm run promo:vo` (the final voice-over
 // is recorded by a person). Scene lengths = max(min, voice + 0.6 s). No music here: add the bed with mix_bed.py.
 import React from "react";
@@ -134,7 +134,7 @@ const Hook: React.FC = () => {
   const top = hero ? 110 : 250;
   return (
     <Scene t={t}>
-      {hero && <Hero3D dir="promo3d/clapper" meta={hero} style={{ left: 444, top: 290, width: 1032, height: 860 }} fadeIn={0.05} />}
+      {hero && <Hero3D dir="promo3d/clapper" meta={hero} style={{ left: 496, top: 250, width: 912, height: 760 }} fadeIn={0.05} />}
       {!hero && <div style={abs({ left: 0, top: 690, width: W, height: 170, overflow: "hidden" })}>
         <div style={{ display: "flex", gap: 14, transform: `translateX(${-60 - t * 40}px)` }}>
           {Array.from({ length: 16 }, (_, i) => {

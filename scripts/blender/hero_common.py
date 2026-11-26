@@ -95,14 +95,14 @@ def bsdf(m):
     return next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
 
 
-def stripes_mat(name, a, b, k=3.0, emit_a=0.0):
-    """diagonal stripes (x + z in object space) between colours a and b — the clapperboard look"""
-    m = mat(name, base=a, metal=0.1, rough=0.25, coat=1.0)
+def stripes_mat(name, a, b, k=3.0, emit_a=0.0, sign=1.0, rough=0.25):
+    """diagonal stripes (x + sign·z in object space) between colours a and b — the clapperboard look"""
+    m = mat(name, base=a, metal=0.1, rough=rough, coat=1.0)
     nt = m.node_tree
     p = bsdf(m)
     tc = nt.nodes.new("ShaderNodeTexCoord")
     sep = nt.nodes.new("ShaderNodeSeparateXYZ")
-    add = nt.nodes.new("ShaderNodeMath"); add.operation = "ADD"
+    add = nt.nodes.new("ShaderNodeMath"); add.operation = "ADD" if sign > 0 else "SUBTRACT"
     mul = nt.nodes.new("ShaderNodeMath"); mul.operation = "MULTIPLY"; mul.inputs[1].default_value = k
     fr = nt.nodes.new("ShaderNodeMath"); fr.operation = "FRACT"
     gt = nt.nodes.new("ShaderNodeMath"); gt.operation = "GREATER_THAN"; gt.inputs[1].default_value = 0.5
@@ -118,6 +118,44 @@ def stripes_mat(name, a, b, k=3.0, emit_a=0.0):
         nt.links.new(mix.outputs["Result"], p.inputs["Emission Color"])
         p.inputs["Emission Strength"].default_value = emit_a
     return m
+
+
+def textured(m, scale=350.0, strength=0.2, distance=0.003):
+    """fine noise bump on a material: moulded plastic, foam, brushed paint"""
+    nt = m.node_tree
+    noise = nt.nodes.new("ShaderNodeTexNoise"); noise.inputs["Scale"].default_value = scale; noise.inputs["Detail"].default_value = 8
+    bump = nt.nodes.new("ShaderNodeBump"); bump.inputs["Strength"].default_value = strength; bump.inputs["Distance"].default_value = distance
+    nt.links.new(noise.outputs["Fac"], bump.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], bsdf(m).inputs["Normal"])
+    return m
+
+
+_FONTS = {}
+
+
+def font(family, body):
+    """the kit's own web fonts (public/fonts/<family>-latin|cyrillic.woff2, FreeType reads woff2); the subset is picked
+    by the text, so keep each text object one script. Without the files: Blender's built-in font (its Ж is broken)"""
+    sub = "cyrillic" if any("\u0400" <= ch <= "\u04FF" for ch in body) else "latin"
+    k = f"{family}-{sub}"
+    if k not in _FONTS:
+        p = os.path.join(ROOT, "public", "fonts", f"{k}.woff2")
+        _FONTS[k] = bpy.data.fonts.load(p, check_existing=True) if os.path.exists(p) else None
+    return _FONTS[k]
+
+
+def text(name, body, size, loc, m, rot=(math.radians(90), 0, 0), align="LEFT", extrude=0.003, weight=0.0, family="inter"):
+    """3D text; the default rot stands it up facing −Y (the camera)"""
+    c = bpy.data.curves.new(name, "FONT")
+    f = font(family, body)
+    if f:
+        c.font = f
+    c.body, c.size, c.extrude, c.offset = body, size, extrude, weight
+    c.align_x, c.align_y = align, "CENTER"
+    o = link(bpy.data.objects.new(name, c))
+    o.location, o.rotation_euler = loc, rot
+    o.data.materials.append(m)
+    return o
 
 
 def link(o):
@@ -211,6 +249,54 @@ def ease_all(obj, mode="EASE_IN_OUT", interp="BEZIER"):
 
 def linear(obj):
     ease_all(obj, interp="LINEAR")
+
+
+# ---- framing: fit the camera to objects, light metals
+def bounds(root):
+    bpy.context.view_layer.update()
+    pts = []
+    for o in [c for c in root.children_recursive if c.type == "MESH"]:
+        pts += [o.matrix_world @ Vector(c) for c in o.bound_box]
+    lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
+    hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
+    return lo, hi
+
+
+def normalize(root, height=2.4):
+    """scale so the object stands `height` tall with its base on z = 0, centred in x/y"""
+    lo, hi = bounds(root)
+    k = height / max(hi.z - lo.z, 1e-6)
+    root.scale = (k, k, k)
+    bpy.context.view_layer.update()
+    lo, hi = bounds(root)
+    c = (lo + hi) / 2
+    root.location = (root.location.x - c.x, root.location.y - c.y, root.location.z - lo.z)
+
+
+def auto_camera(roots, res, lens=70, margin=1.08, tilt=10, swing=0.0):
+    """fit the box of `roots` by width and height (sensor fit AUTO: 36 mm on the long side); `swing` (rad) widens the
+    width for a turntable"""
+    lo = Vector((1e9, 1e9, 1e9)); hi = -lo
+    for r in roots:
+        a_, b_ = bounds(r)
+        lo = Vector(map(min, lo, a_)); hi = Vector(map(max, hi, b_))
+    c = (lo + hi) / 2
+    w = max(hi.x - lo.x, hi.y - lo.y) if swing else hi.x - lo.x
+    h, depth = hi.z - lo.z, hi.y - lo.y
+    long_ = 18 / lens
+    hf = 2 * math.atan(long_ * (1 if res[0] >= res[1] else res[0] / res[1]))
+    vf = 2 * math.atan(long_ * (1 if res[1] >= res[0] else res[1] / res[0]))
+    d = (max((w / 2) / math.tan(hf / 2), (h / 2) / math.tan(vf / 2)) + depth / 2) * margin
+    t = math.radians(tilt)
+    camera((c.x, c.y - d * math.cos(t), c.z + d * math.sin(t)), (c.x, c.y, c.z), lens)
+
+
+def bright_world(strength=0.9):
+    """soft grey studio sky: metals reflect light instead of the dark default; invisible (transparent film)"""
+    bg = next(n for n in bpy.context.scene.world.node_tree.nodes if n.type == "BACKGROUND")
+    bg.inputs[0].default_value = (0.55, 0.58, 0.64, 1)
+    bg.inputs[1].default_value = strength
+
 
 
 def render(out, still=None):
