@@ -16,3 +16,4 @@ __pycache__/
 !.env.example
 kit.config.local.json
 public/promo/
+public/promo3d/

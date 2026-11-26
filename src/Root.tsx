@@ -4,7 +4,8 @@ import { EndCard } from "./kit/EndCard";
 import { Example, exampleDuration, type ExampleProps } from "./example/Example";
 import { SampleScreen } from "./example/SampleScreen";
 import { KIT } from "./kit/theme";
-import { Promo, PROMO_FPS, PROMO_VARIANTS, promoFrames, type PromoProps } from "./promo/Promo";
+import { HERO_NAMES, Promo, PROMO_FPS, PROMO_VARIANTS, promoFrames, type PromoProps } from "./promo/Promo";
+import { loadHeroMeta } from "./kit/Hero3D";
 
 // Drafts: render at a smaller scale instead of separate compositions, e.g. `--scale=0.6666666666666666` → 1280×720 from 1920×1080.
 const loadExample = async () => {
@@ -31,7 +32,9 @@ export const RemotionRoot: React.FC = () => {
             // scratch voice-over (npm run promo:vo) sets the scene lengths; without it the promo renders silent at minimum lengths
             const r = await fetch(staticFile("promo/vo.json")).catch(() => null);
             const vo = r && r.ok ? ((await r.json()) as Record<string, number>) : null;
-            return { props: { ...props, vo }, durationInFrames: promoFrames(vo) };
+            // 3D heroes (npm run promo:3d): missing renders → the flat layout of each scene
+            const heroes = Object.fromEntries(await Promise.all(HERO_NAMES.map(async (n) => [n, await loadHeroMeta(`promo3d/${n}`)] as const)));
+            return { props: { ...props, vo, heroes }, durationInFrames: promoFrames(vo) };
           }} />
       ))}
     </>

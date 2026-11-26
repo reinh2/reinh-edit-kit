@@ -7,5 +7,6 @@
 - Звук: `voice_master.py` (пресеты по типам микрофонов, `analyze`, `match`), `mix_bed.py`, `find_offset.mjs`, `sync_pieces.mjs`, генераторы SFX.
 - Субтитры: `make_srt.py`, компонент `Captions`.
 - Стили анимации `light` и `cine` (`themes`, `cine`, `chapter`: засвет, главы с часами), промо-ролик в трёх вариантах.
+- 3D-герои из Blender: `hero_common.py`, `promo_heroes.py`, компонент `Hero3D`.
 - Установка одной командой: `install.sh`.
 - Remotion: `ScreenCam`, `Captions`, `EndCard`, `OverlayCard`/`Pill`/`Bar`, пример на синтетических исходниках.

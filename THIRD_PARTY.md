@@ -15,6 +15,7 @@
 | [Remotion](https://www.remotion.dev) | Remotion License | **бесплатно для частных лиц и компаний до 3 человек**; компаниям больше - нужна платная лицензия Remotion ([remotion.dev/license](https://www.remotion.dev/license)) |
 | [FFmpeg](https://ffmpeg.org) | LGPL/GPL (зависит от сборки) | |
 | [whisper.cpp](https://github.com/ggml-org/whisper.cpp) и модели Whisper | MIT | |
+| [Blender](https://www.blender.org) | GPL | необязательно, только для 3D-героев |
 | [auto-editor](https://github.com/WyattBlue/auto-editor) | Unlicense | необязательно |
 | Скиллы `remotion-dev/skills`, `WyattBlue/auto-editor` | у авторов | ставятся командой `npx skills add` |
 

@@ -4,12 +4,14 @@
 //   light — every scene light (white cards, Inter, one accent);
 //   cine  — every scene cine (dark navy, glass, chrome back words, grain);
 //   mix   — big moments cine (hook, inside, styles, limits, ending), the four guide steps light — like a real long video;
-// a light leak covers every scene change. Authored on a 1920×1080 grid and scaled (Fit).
+// a light leak covers every scene change. 3D heroes (Blender, `npm run promo:3d`): a clapperboard snaps on the cut in the hook,
+// a studio mic turns in step 2, the kit case opens at the end; without renders the scenes keep their flat layout. Authored on a 1920×1080 grid and scaled (Fit).
 // Voice-over text: src/promo/script.json; scratch synthetic voice for pacing: `npm run promo:vo` (the final voice-over
 // is recorded by a person). Scene lengths = max(min, voice + 0.6 s). No music here: add the bed with mix_bed.py.
 import React from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { LightLeak } from "../kit/chapter";
+import { Hero3D, type HeroMeta } from "../kit/Hero3D";
 import { loadCineFonts } from "../kit/cine";
 import { loadBaseFonts } from "../kit/fonts";
 import { clamp01, ease, impulse, lerp, prog, typed } from "../kit/motion";
@@ -24,7 +26,11 @@ const abs = (s: React.CSSProperties): React.CSSProperties => ({ position: "absol
 const rise = (p: number, dy = 24): React.CSSProperties => ({ opacity: clamp01(p), filter: `blur(${(1 - clamp01(p)) * 10}px)`, transform: `translateY(${(1 - p) * dy}px)` });
 
 export type PromoVariant = "light" | "cine" | "mix";
-export type PromoProps = { vo: Record<string, number> | null; variant: PromoVariant };
+export type PromoHeroes = Partial<Record<"clapper" | "mic" | "case", HeroMeta | null>>;
+export type PromoProps = { vo: Record<string, number> | null; variant: PromoVariant; heroes?: PromoHeroes };
+export const HERO_NAMES = ["clapper", "mic", "case"] as const;
+const HeroCtx = React.createContext<PromoHeroes>({});
+const useHero = (n: keyof PromoHeroes) => React.useContext(HeroCtx)[n] ?? null;
 type SceneId = (typeof script.scenes)[number]["id"];
 export const sceneDurations = (vo: PromoProps["vo"]) => script.scenes.map((s) => Math.max(s.min, vo?.[s.id] ? vo[s.id] + 0.6 : 0));
 export const promoFrames = (vo: PromoProps["vo"]) => Math.round(sceneDurations(vo).reduce((a, b) => a + b, 0) * PROMO_FPS);
@@ -120,9 +126,12 @@ const Hook: React.FC = () => {
   const words = ["Монтаж", "с ИИ"];
   const pill = prog(t, 2.2, 0.5, ease.outBack);
   const cine = th.name === "cine";
+  const hero = useHero("clapper");
+  const top = hero ? 110 : 250;
   return (
     <Scene t={t}>
-      <div style={abs({ left: 0, top: 690, width: W, height: 170, overflow: "hidden" })}>
+      {hero && <Hero3D dir="promo3d/clapper" meta={hero} style={{ left: 444, top: 290, width: 1032, height: 860 }} fadeIn={0.05} />}
+      {!hero && <div style={abs({ left: 0, top: 690, width: W, height: 170, overflow: "hidden" })}>
         <div style={{ display: "flex", gap: 14, transform: `translateX(${-60 - t * 40}px)` }}>
           {Array.from({ length: 16 }, (_, i) => {
             const pause = i >= 6 && i <= 8;
@@ -134,18 +143,18 @@ const Hook: React.FC = () => {
             );
           })}
         </div>
-      </div>
-      {t > CUT - 0.3 && t < CUT + 0.6 && <div style={abs({ left: 0, top: 670, width: W, height: 210, background: `linear-gradient(90deg, transparent, rgba(91,140,255,${0.25 * (1 - prog(t, CUT, 0.6))}), transparent)` })} />}
-      <div style={abs({ left: 0, width: W, top: 250, textAlign: "center" })}>
+      </div>}
+      {!hero && t > CUT - 0.3 && t < CUT + 0.6 && <div style={abs({ left: 0, top: 670, width: W, height: 210, background: `linear-gradient(90deg, transparent, rgba(91,140,255,${0.25 * (1 - prog(t, CUT, 0.6))}), transparent)` })} />}
+      <div style={abs({ left: 0, width: W, top, textAlign: "center" })}>
         {words.map((w, i) => {
           const p = prog(t, 0.15 + i * 0.22, 0.6, ease.outExpo);
           return <span key={w} style={{ display: "inline-block", margin: "0 22px", fontFamily: FONT, fontWeight: 850, fontSize: 190, letterSpacing: "-0.045em", color: i ? th.accent : th.ink, textShadow: cine ? "0 20px 60px rgba(0,0,0,0.5)" : "none", ...rise(p, 40) }}>{w}</span>;
         })}
       </div>
-      <div style={abs({ left: 0, width: W, top: 500, display: "flex", justifyContent: "center", gap: 18 })}>
+      <div style={abs({ left: 0, width: W, top: hero ? 968 : top + 250, display: "flex", justifyContent: "center", gap: 18 })}>
         <Chip text="вся система" p={pill} /><Chip text="бесплатно" p={pill} solid />
       </div>
-      <S at={0.15} f="in" /><S at={CUT} f="whoosh" db={-16} /><S at={2.2} f="land" />
+      <S at={0.15} f="in" /><S at={CUT} f={hero ? "stamp" : "whoosh"} db={hero ? -10 : -16} /><S at={2.2} f="land" />
     </Scene>
   );
 };
@@ -232,17 +241,19 @@ const Mic: React.FC = () => {
   const chart = prog(t, 2.9, 0.5, ease.outCubic);
   const fix = prog(t, 4.3, 0.9, ease.inOutCubic);
   const done = prog(t, 5.3, 0.45, ease.outBack);
+  const hero = useHero("mic");
   return (
     <Scene t={t} n={2} label="Ваш микрофон" back="звук">
-      <div style={abs({ left: 110, top: 230, display: "flex", flexDirection: "column", gap: 20 })}>
+      {hero && <Hero3D dir="promo3d/mic" meta={hero} style={{ left: 110, top: 170, width: 580, height: 870 }} />}
+      <div style={abs(hero ? { left: 760, top: 905, display: "flex", flexDirection: "row", gap: 10 } : { left: 110, top: 230, display: "flex", flexDirection: "column", gap: 20 })}>
         {MICS.map(([ic, label], i) => {
           const p = prog(t, 0.1 + i * 0.07, 0.4, ease.outBack);
           const on = i === sel;
           return (
-            <div key={label} style={{ display: "flex", alignItems: "center", gap: 22, width: 520, padding: "18px 26px", borderRadius: 26, background: on ? th.solid : th.chip,
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: hero ? 10 : 22, width: hero ? undefined : 520, padding: hero ? "10px 16px" : "18px 26px", borderRadius: 26, background: on ? th.solid : th.chip,
               border: on ? "none" : `2px solid ${th.chipBorder}`, opacity: clamp01(p * 2), transform: `translateX(${(1 - p) * -40}px)` }}>
-              <Icon d={IC[ic]} size={58} color={on ? th.onSolid : th.ink} />
-              <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: 38, color: on ? th.onSolid : th.ink }}>{label}</div>
+              <Icon d={IC[ic]} size={hero ? 34 : 58} color={on ? th.onSolid : th.ink} />
+              <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: hero ? 26 : 38, color: on ? th.onSolid : th.ink, whiteSpace: "nowrap" }}>{label}</div>
             </div>
           );
         })}
@@ -441,16 +452,19 @@ const Cta: React.FC<{ dur: number }> = ({ dur }) => {
   const title = prog(t, 0.1, 0.6, ease.outExpo);
   const pill = prog(t, 1.1, 0.5, ease.outBack);
   const out = prog(t, dur - 0.6, 0.6, ease.inCubic);
+  const hero = useHero("case");
+  const col: React.CSSProperties = hero ? { left: 800, width: 1040, justifyContent: "flex-start", textAlign: "left" } : { left: 0, width: W, justifyContent: "center", textAlign: "center" };
   return (
     <AbsoluteFill style={{ opacity: 1 - out, background: "#000" }}>
       <Scene t={t}>
-        <div style={abs({ left: 0, width: W, top: 240, textAlign: "center", fontFamily: FONT, fontWeight: 850, fontSize: 150, letterSpacing: "-0.045em", color: th.ink, ...rise(title, 40) })}>
+        {hero && <Hero3D dir="promo3d/case" meta={hero} style={{ left: 10, top: 150, width: 820, height: 820 }} fadeIn={0.1} />}
+        <div style={abs({ ...col, top: hero ? 270 : 240, fontFamily: FONT, fontWeight: 850, fontSize: hero ? 128 : 150, letterSpacing: "-0.045em", color: th.ink, whiteSpace: "nowrap", ...rise(title, 40) })}>
           Reinh <span style={{ color: th.accent }}>Edit Kit</span>
         </div>
-        <div style={abs({ left: 0, width: W, top: 460, display: "flex", justifyContent: "center", gap: 18 })}>
+        <div style={abs({ ...col, top: hero ? 450 : 460, display: "flex", gap: 18 })}>
           {["MIT", "бесплатно", "macOS · Linux · WSL"].map((c, i) => <Chip key={c} text={c} p={prog(t, 0.5 + i * 0.12, 0.4, ease.outBack)} size={38} />)}
         </div>
-        <div style={abs({ left: 0, width: W, top: 640, display: "flex", justifyContent: "center", opacity: clamp01(pill * 2), transform: `scale(${lerp(0.9, 1, pill)})` })}>
+        <div style={abs({ ...col, top: hero ? 600 : 640, display: "flex", opacity: clamp01(pill * 2), transform: `scale(${lerp(0.9, 1, pill)})`, transformOrigin: hero ? "0 50%" : "50% 50%" })}>
           <div style={{ display: "flex", alignItems: "center", gap: 26, padding: "26px 52px 26px 30px", borderRadius: 999, background: th.name === "cine" ? "rgba(255,255,255,0.96)" : "rgba(17,19,24,0.94)", boxShadow: th.card.boxShadow }}>
             <div style={{ width: 84, height: 84, borderRadius: 99, background: ACCENT, display: "flex", alignItems: "center", justifyContent: "center" }}><Icon d={IC.send} size={46} color="#fff" sw={2.1} /></div>
             <div>
@@ -460,6 +474,7 @@ const Cta: React.FC<{ dur: number }> = ({ dur }) => {
           </div>
         </div>
         <S at={0.1} f="chapter" db={-14} /><S at={1.1} f="land" />
+        {hero && <><S at={0.9} f="in" db={-16} /><S at={1.7} f="glint" db={-14} />{[0, 1, 2].map((i) => <S key={i} at={1.75 + i * 0.18} f="tap" db={-18} />)}</>}
       </Scene>
     </AbsoluteFill>
   );
@@ -467,13 +482,14 @@ const Cta: React.FC<{ dur: number }> = ({ dur }) => {
 
 const SCENES: Record<SceneId, React.FC<{ dur: number }>> = { hook: Hook, pipeline: Pipeline, install: Install, mic: Mic, agent: Agent, qc: Qc, styles: Styles, limits: Limits, cta: Cta };
 
-export const Promo: React.FC<PromoProps> = ({ vo, variant = "mix" }) => {
+export const Promo: React.FC<PromoProps> = ({ vo, variant = "mix", heroes = {} }) => {
   loadBaseFonts();
   const frame = useCurrentFrame();
   const t = frame / PROMO_FPS;
   const durs = sceneDurations(vo);
   const starts = durs.map((_, i) => durs.slice(0, i).reduce((a, b) => a + b, 0));
   return (
+    <HeroCtx.Provider value={heroes}>
     <AbsoluteFill style={{ background: "#000" }}>
       {script.scenes.map((s, i) => {
         const Scene = SCENES[s.id as SceneId];
@@ -489,6 +505,7 @@ export const Promo: React.FC<PromoProps> = ({ vo, variant = "mix" }) => {
       {starts.slice(1).map((at, i) => <LightLeak key={i} t={t} at={at} seed={i} dark={themeOf(variant, script.scenes[i].id) === "cine" && themeOf(variant, script.scenes[i + 1].id) === "cine"} />)}
       {starts.slice(1).map((at, i) => <S key={`w${i}`} at={at - 0.12} f="whoosh" db={-24} />)}
     </AbsoluteFill>
+    </HeroCtx.Provider>
   );
 };
 
