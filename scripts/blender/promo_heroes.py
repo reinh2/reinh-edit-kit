@@ -1,10 +1,9 @@
 # 3D heroes of the promo (src/promo/Promo.tsx), procedural and rendered to transparent PNG sequences, 30 fps:
 #   clapper  hook: a glass clapperboard flies in, the striped clapper snaps shut on the «cut» (1.5 s), slow drift; 5.6 s
-#   mic      step 2: a studio condenser mic (chrome grille, glass body, accent LED ring) on a slow turntable; 7.4 s
 #   case     ending: the kit's hard case, the lid opens (0.9–1.6 s), light inside, three blocks pop out
 #            (skills · scripts · styles) and hover; 6 s
-# Usage: blender -b -P scripts/blender/promo_heroes.py -- clapper|mic|case [--out DIR] [--still N]
-#        npm run promo:3d   (all three into public/promo3d/<name>/)
+# Usage: blender -b -P scripts/blender/promo_heroes.py -- clapper|case [--out DIR] [--still N]
+#        npm run promo:3d   (both into public/promo3d/<name>/). The microphones of step 2 are real models: mics.py
 import math, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy
@@ -61,49 +60,6 @@ if variant == "clapper":
             if abs(kp.co[0] - F(1.3)) < 0.5:
                 kp.interpolation = "QUAD"; kp.easing = "EASE_IN"
     camera((0, -11.5, 1.2), (0, 0, 0.75), 50)
-
-elif variant == "mic":
-    N = F(7.4)
-    s = reset(FPS, N, (800, 1200))
-    studio(rim=1700)
-    root = empty("root", (0, 0, 0))
-    # capsule head: a wire grille (cylinder with dense rings + dome, wireframe in chrome) over a dark core
-    import bmesh
-    bpy.ops.mesh.primitive_cylinder_add(vertices=40, radius=0.62, depth=1.1, location=(0, 0, 1.0), end_fill_type="NOTHING")
-    head = bpy.context.object; head.name = "grille"
-    bm = bmesh.new(); bm.from_mesh(head.data)
-    vert_edges = [e for e in bm.edges if abs(e.verts[0].co.z - e.verts[1].co.z) > 0.5]
-    bmesh.ops.subdivide_edges(bm, edges=vert_edges, cuts=16, use_grid_fill=False)
-    bm.to_mesh(head.data); bm.free()
-    head.modifiers.new("wire", "WIREFRAME").thickness = 0.016
-    head.data.materials.append(chrome()); head.parent = root
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=40, ring_count=20, radius=0.62, location=(0, 0, 1.55))
-    dome = bpy.context.object; dome.name = "dome"; dome.scale = (1, 1, 0.75)
-    dome.modifiers.new("wire", "WIREFRAME").thickness = 0.016
-    dome.data.materials.append(chrome()); dome.parent = root
-    coremat = mat("core", base=(0.01, 0.012, 0.02, 1), metal=0.2, rough=0.7, coat=0)
-    core = cyl("core", 0.585, 1.1, (0, 0, 1.0), coremat); core.parent = root
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=0.585, location=(0, 0, 1.55))
-    cd = bpy.context.object; cd.scale = (1, 1, 0.72); cd.data.materials.append(coremat); bpy.ops.object.shade_smooth(); cd.parent = root
-    for z in (0.45, 1.55):
-        bpy.ops.mesh.primitive_torus_add(major_radius=0.625, minor_radius=0.035, location=(0, 0, z))
-        t = bpy.context.object; t.data.materials.append(chrome()); bpy.ops.object.shade_smooth(); t.parent = root
-    ring = cyl("ring", 0.66, 0.16, (0, 0, 0.36), chrome(), bevel=0.03); ring.parent = root
-    bpy.ops.mesh.primitive_cone_add(vertices=96, radius1=0.5, radius2=0.6, depth=2.2, location=(0, 0, -0.84))
-    body = bpy.context.object; body.name = "body"; body.data.materials.append(glass()); bpy.ops.object.shade_smooth(); body.parent = root
-    led = cyl("led", 0.6, 0.05, (0, 0, 0.18), glow("led", ACC, 9)); led.parent = root
-    badge = cyl("badge", 0.09, 0.04, (0, -0.585, -0.35), glow("badge", ACC, 5), rot=(math.radians(90), 0, 0)); badge.parent = root
-    foot = cyl("foot", 0.42, 0.18, (0, 0, -2.0), chrome(), bevel=0.04); foot.parent = root
-    key(root, 1, scale=(0.75, 0.75, 0.75), location=(0, 0, -0.6), rotation_euler=(math.radians(3), 0, 0))
-    key(root, F(0.6), scale=(1, 1, 1), location=(0, 0, 0), rotation_euler=(math.radians(3), 0, math.radians(40)))
-    ease_all(root, "EASE_OUT")
-    key(root, N, rotation_euler=(math.radians(3), 0, math.radians(40 + 150)))
-    for fc in curves(root):
-        if fc.data_path == "rotation_euler" and fc.array_index == 2:
-            for kp in fc.keyframe_points:
-                if kp.co[0] > F(0.6) - 0.5:
-                    kp.interpolation = "LINEAR"
-    camera((0, -8.6, 0.5), (0, 0, -0.1), 50)
 
 elif variant == "case":
     N = F(6.0)

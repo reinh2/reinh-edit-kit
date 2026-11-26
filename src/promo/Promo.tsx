@@ -26,11 +26,15 @@ const abs = (s: React.CSSProperties): React.CSSProperties => ({ position: "absol
 const rise = (p: number, dy = 24): React.CSSProperties => ({ opacity: clamp01(p), filter: `blur(${(1 - clamp01(p)) * 10}px)`, transform: `translateY(${(1 - p) * dy}px)` });
 
 export type PromoVariant = "light" | "cine" | "mix";
-export type PromoHeroes = Partial<Record<"clapper" | "mic" | "case", HeroMeta | null>>;
+// real popular microphones as procedural 3D models (scripts/blender/mics.py → public/mics3d/<id>/, `npm run mics:3d`)
+export const MIC_MODELS = [["yeti", "Blue Yeti"], ["solocast", "HyperX SoloCast"], ["sm7b", "Shure SM7B"], ["podmic", "Rode PodMic"], ["dji", "DJI Mic Mini 2"]] as const;
+export type MicId = (typeof MIC_MODELS)[number][0];
+export type PromoHeroes = Partial<Record<"clapper" | "case", HeroMeta | null>> & { mics?: Partial<Record<MicId, HeroMeta | null>> };
 export type PromoProps = { vo: Record<string, number> | null; variant: PromoVariant; heroes?: PromoHeroes };
-export const HERO_NAMES = ["clapper", "mic", "case"] as const;
+export const HERO_NAMES = ["clapper", "case"] as const;
 const HeroCtx = React.createContext<PromoHeroes>({});
-const useHero = (n: keyof PromoHeroes) => React.useContext(HeroCtx)[n] ?? null;
+const useHero = (n: "clapper" | "case") => React.useContext(HeroCtx)[n] ?? null;
+const useMics = () => React.useContext(HeroCtx).mics ?? {};
 type SceneId = (typeof script.scenes)[number]["id"];
 export const sceneDurations = (vo: PromoProps["vo"]) => script.scenes.map((s) => Math.max(s.min, vo?.[s.id] ? vo[s.id] + 0.6 : 0));
 export const promoFrames = (vo: PromoProps["vo"]) => Math.round(sceneDurations(vo).reduce((a, b) => a + b, 0) * PROMO_FPS);
@@ -234,26 +238,34 @@ const Install: React.FC = () => {
 const MICS: [string, string][] = [["mic", "USB"], ["dynamic", "динамический"], ["lav", "петличка"], ["headset", "гарнитура"], ["phone", "телефон"]];
 const BANDS = [125, 250, 500, "1k", "2k", "4k", "8k"];
 const DEV = [-1.5, 2.6, -0.4, 1.8, -3.2, -4.1, 1.2]; // an illustrative «before» against the average voice
+const SLOT = 0.62, SLOT0 = 0.25; // the 3D mics take turns: one per slot, the last one stays
 const Mic: React.FC = () => {
   const t = useT();
   const th = useTheme();
-  const sel = Math.min(4, Math.floor(clamp01((t - 0.6) / 2.2) * 5));
+  const mics = useMics();
+  const real = MIC_MODELS.some(([id]) => mics[id]);
+  const n = real ? MIC_MODELS.length : MICS.length;
+  const sel = real ? Math.max(0, Math.min(n - 1, Math.floor((t - SLOT0) / SLOT))) : Math.min(4, Math.floor(clamp01((t - 0.6) / 2.2) * 5));
   const chart = prog(t, 2.9, 0.5, ease.outCubic);
   const fix = prog(t, 4.3, 0.9, ease.inOutCubic);
   const done = prog(t, 5.3, 0.45, ease.outBack);
-  const hero = useHero("mic");
+  const switches = real ? MIC_MODELS.map((_, i) => SLOT0 + i * SLOT) : MICS.map((_, i) => 0.6 + i * 0.44);
   return (
     <Scene t={t} n={2} label="Ваш микрофон" back="звук">
-      {hero && <Hero3D dir="promo3d/mic" meta={hero} style={{ left: 110, top: 170, width: 580, height: 870 }} />}
-      <div style={abs(hero ? { left: 760, top: 905, display: "flex", flexDirection: "row", gap: 10 } : { left: 110, top: 230, display: "flex", flexDirection: "column", gap: 20 })}>
-        {MICS.map(([ic, label], i) => {
+      {real && MIC_MODELS.map(([id], i) => i === sel && (
+        <Sequence key={id} from={Math.round(switches[i] * PROMO_FPS)} layout="none">
+          <Hero3D dir={`mics3d/${id}`} meta={mics[id] ?? null} style={{ left: 90, top: 160, width: 620, height: 775 }} fadeIn={0.08} />
+        </Sequence>
+      ))}
+      <div style={abs(real ? { left: 760, top: 905, display: "flex", flexDirection: "row", gap: 10 } : { left: 110, top: 230, display: "flex", flexDirection: "column", gap: 20 })}>
+        {(real ? MIC_MODELS.map(([, name]) => ["", name] as [string, string]) : MICS).map(([ic, label], i) => {
           const p = prog(t, 0.1 + i * 0.07, 0.4, ease.outBack);
           const on = i === sel;
           return (
-            <div key={label} style={{ display: "flex", alignItems: "center", gap: hero ? 10 : 22, width: hero ? undefined : 520, padding: hero ? "10px 16px" : "18px 26px", borderRadius: 26, background: on ? th.solid : th.chip,
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: real ? 0 : 22, width: real ? undefined : 520, padding: real ? "10px 16px" : "18px 26px", borderRadius: 26, background: on ? th.solid : th.chip,
               border: on ? "none" : `2px solid ${th.chipBorder}`, opacity: clamp01(p * 2), transform: `translateX(${(1 - p) * -40}px)` }}>
-              <Icon d={IC[ic]} size={hero ? 34 : 58} color={on ? th.onSolid : th.ink} />
-              <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: hero ? 26 : 38, color: on ? th.onSolid : th.ink, whiteSpace: "nowrap" }}>{label}</div>
+              {ic && <Icon d={IC[ic]} size={58} color={on ? th.onSolid : th.ink} />}
+              <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: real ? 25 : 38, color: on ? th.onSolid : th.ink, whiteSpace: "nowrap" }}>{label}</div>
             </div>
           );
         })}
@@ -277,7 +289,7 @@ const Mic: React.FC = () => {
           <Tick /><div style={{ fontFamily: FONT, fontWeight: 750, fontSize: 40, color: th.ink }}>пресет под ваш микрофон</div>
         </div>
       </Card>
-      {MICS.map((_, i) => <S key={i} at={0.6 + i * 0.44} f="tick" db={-22} />)}
+      {switches.map((at, i) => <S key={i} at={at} f={real ? "tap" : "tick"} db={-20} />)}
       <S at={2.9} f="in" db={-16} /><S at={4.3} f="rise" db={-18} /><S at={5.3} f="success" />
     </Scene>
   );
