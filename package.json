@@ -13,10 +13,11 @@
     "sfx": "node scripts/audio/sfx-synth-v1.mjs public/sfx/v1 && node scripts/audio/sfx-synth-v2.mjs public/sfx/v2 && node scripts/audio/sfx-synth-v3.mjs public/sfx/v3",
     "sample": "python3 scripts/example/make_sample.py",
     "render:example": "remotion render Example out/example_preview.mp4 --scale=0.6666666666666666 && remotion render ExampleShort out/example_short_preview.mp4 --scale=0.6666666666666666",
-    "render:promo": "remotion render Promo out/promo_mix_draft_720p.mp4 --scale=0.5 && remotion render Promo-Light out/promo_light_draft_720p.mp4 --scale=0.5 && remotion render Promo-Cine out/promo_cine_draft_720p.mp4 --scale=0.5",
+    "render:promo": "remotion render Promo out/promo_mix_draft_720p.mp4 --scale=0.5",
     "test": "bash scripts/test.sh",
     "lint": "tsc",
-    "promo:vo": "python3 scripts/example/make_promo_vo.py"
+    "promo:vo": "python3 scripts/example/make_promo_vo.py",
+    "render:promo:all": "remotion render Promo out/promo_mix_draft_720p.mp4 --scale=0.5 && remotion render Promo-Light out/promo_light_draft_720p.mp4 --scale=0.5 && remotion render Promo-Cine out/promo_cine_draft_720p.mp4 --scale=0.5"
   },
   "dependencies": {
     "@remotion/cli": "4.0.539",
