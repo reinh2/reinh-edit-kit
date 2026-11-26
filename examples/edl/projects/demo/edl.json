@@ -1,0 +1,13 @@
+{
+ "_comment": "Demo EDL: face hook with a jump cut, a screen demo with camera moves, a chapter card, an insert over the voice, a face outro with a slow push-in. Times inside pieces are local seconds.",
+ "base": "projects/demo/base.json",
+ "fps": 60, "handle": 0.8, "faceZoom": [1.0, 1.14], "lcut": 0.3, "clockStart": "10:00:00", "media": "media",
+ "pieces": [
+  {"id": "HOOK", "kind": "face", "clips": [[0.4, 5.2, "hook line"], [6.1, 11.8, "promise, pause before it cut"]]},
+  {"id": "DEMO", "kind": "screen", "clips": [[0.5, 16.0, "the demo"]],
+   "cams": [[0.5, 960, 540, 1920, 0], [3.0, 700, 400, 1100, 0.7], [8.0, 1200, 600, 1000, 0.7], [12.5, 960, 540, 1920, 0.6]]},
+  {"id": "OUTRO", "kind": "face", "clips": [[0.3, 8.4, "result and question"]], "push": [[0.3, 8.4, 1.0, 1.1, "slow push-in on the conclusion"]]}
+ ],
+ "gaps": [{"after": "DEMO", "d": 1.5, "el": "Chapter 2", "dip": true}],
+ "overs": [{"piece": "HOOK", "at": 7.0, "to": 9.5, "el": "ResultCard", "beats": {"number": 8.2}}]
+}

@@ -1,0 +1,6 @@
+{"_comment": "Source pieces: obs = clock time the recording started (HH-MM-SS), in_s = where the piece starts in it, dur = its length (s).",
+ "segments": [
+  {"id": "HOOK", "obs": "10-00-00", "in_s": 12.0, "dur": 14.0},
+  {"id": "DEMO", "obs": "10-05-00", "in_s": 40.0, "dur": 20.0},
+  {"id": "OUTRO", "obs": "10-00-00", "in_s": 90.0, "dur": 9.0}
+ ]}

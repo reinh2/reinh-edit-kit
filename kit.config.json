@@ -1,0 +1,67 @@
+{
+  "_comment": "Ваши настройки. Скрипты и стартовый проект Remotion читают этот файл. Подробно - docs/YOUR_SETUP.md.",
+  "language": "ru",
+  "whisperModel": "models/ggml-small.bin",
+  "glossary": "glossary.json",
+  "brand": {
+    "name": "Ваше имя",
+    "tagline": "Чем вы занимаетесь",
+    "accent": "#2F6BFF",
+    "ink": "#111318",
+    "muted": "#8A8F98",
+    "page": "#F3F5F9",
+    "font": "Inter"
+  },
+  "style": "light",
+  "endCard": {
+    "headline": [
+      "Расскажите",
+      "о своей задаче"
+    ],
+    "cta": "Написать в Telegram",
+    "ctaHandle": "t.me/your_handle",
+    "contacts": [
+      {
+        "icon": "globe",
+        "value": "your-site.example",
+        "note": "сайт"
+      },
+      {
+        "icon": "channel",
+        "value": "@your_channel",
+        "note": "канал"
+      },
+      {
+        "icon": "mail",
+        "value": "you@example.com",
+        "note": "почта"
+      }
+    ]
+  },
+  "formats": {
+    "short": {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30
+    },
+    "long": {
+      "width": 2560,
+      "height": 1440,
+      "fps": 60
+    },
+    "preview": {
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "captions": {
+    "maxWords": 3,
+    "top": 1500,
+    "fontSize": 70
+  },
+  "mics": {
+    "main": "usb-condenser",
+    "backup": "camera"
+  },
+  "voicePresets": {}
+}
