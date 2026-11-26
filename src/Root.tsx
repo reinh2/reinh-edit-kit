@@ -6,6 +6,7 @@ import { SampleScreen } from "./example/SampleScreen";
 import { KIT } from "./kit/theme";
 import { HERO_NAMES, MIC_MODELS, Promo, PROMO_FPS, PROMO_VARIANTS, promoFrames, type PromoHeroes, type PromoProps } from "./promo/Promo";
 import { loadHeroMeta, loadOptionalJson } from "./kit/Hero3D";
+import { Guide, GUIDE_FPS, guideFrames, type GuideProps, type ShotSizes } from "./guide/Guide";
 
 // Drafts: render at a smaller scale instead of separate compositions, e.g. `--scale=0.6666666666666666` → 1280×720 from 1920×1080.
 const loadExample = async () => {
@@ -37,6 +38,14 @@ export const RemotionRoot: React.FC = () => {
             return { props: { ...props, vo, heroes }, durationInFrames: promoFrames(vo) };
           }} />
       ))}
+      {/* install guide: real window screenshots (npm run guide:shots), scratch voice (npm run guide:vo) */}
+      <Composition id="Guide" component={Guide} fps={GUIDE_FPS} width={2560} height={1440} defaultProps={{ vo: null, sizes: null } as GuideProps}
+        durationInFrames={guideFrames(null)}
+        calculateMetadata={async ({ props }) => {
+          const vo = await loadOptionalJson<Record<string, number>>("guide/vo.json");
+          const sizes = await loadOptionalJson<ShotSizes>("guide/shots/sizes.json");
+          return { props: { ...props, vo, sizes }, durationInFrames: guideFrames(vo) };
+        }} />
     </>
   );
 };

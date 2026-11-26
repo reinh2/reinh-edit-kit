@@ -11,3 +11,5 @@
 - Установка одной командой: `install.sh` (без терминала не падает, проверяет версию Node так же, как Remotion).
 - Remotion: `ScreenCam`, `Captions`, `EndCard`, `OverlayCard`/`Pill`/`Bar`, пример на синтетических исходниках.
 - Remotion 4.0.547 (`npm audit`: 0 уязвимостей). У всех скриптов есть `--help`.
+- Гайд по установке (`src/guide/`): композиция `Guide` из настоящих снимков окон, `npm run guide:shots`, `guide:vo`, `render:guide`; помощники съёмки окон `scripts/example/guide_capture.sh`.
+- Установщик, `doctor.sh` и скрипты печатают пути как `~/…` (без имени пользователя), npm без лишних уведомлений.

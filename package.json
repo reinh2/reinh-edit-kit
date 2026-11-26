@@ -17,6 +17,9 @@
     "test": "bash scripts/test.sh",
     "lint": "tsc",
     "promo:vo": "python3 scripts/example/make_promo_vo.py",
+    "guide:vo": "python3 scripts/example/make_promo_vo.py --video guide",
+    "guide:shots": "python3 scripts/example/guide_shots.py",
+    "render:guide": "remotion render Guide out/guide_draft_720p.mp4 --scale=0.5",
     "render:promo:all": "remotion render Promo out/promo_mix_draft_720p.mp4 --scale=0.5 && remotion render Promo-Light out/promo_light_draft_720p.mp4 --scale=0.5 && remotion render Promo-Cine out/promo_cine_draft_720p.mp4 --scale=0.5",
     "promo:3d": "for v in clapper case; do bash scripts/blender/blender.sh -b -P scripts/blender/promo_heroes.py -- $v || exit 1; done && npm run mics:3d",
     "mics:3d": "for v in yeti solocast sm7b podmic dji; do bash scripts/blender/blender.sh -b -P scripts/blender/mics.py -- $v || exit 1; done && bash scripts/blender/blender.sh -b -P scripts/blender/mics.py -- lineup"

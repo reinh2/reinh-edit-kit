@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Scratch voice-over for the promo (src/promo/script.json): one synthetic line per scene (macOS `say`, else espeak-ng),
-processed with voice_master (preset neutral) → public/promo/vo_<id>.wav + public/promo/vo.json (durations).
-Only for pacing the draft: the final voice-over is recorded by a person. Files stay local (public/promo is ignored)."""
+"""Scratch voice-over for the promo (src/promo/script.json) or the install guide (--video guide, src/guide/script.json):
+one synthetic line per scene (macOS `say`, else espeak-ng), processed with voice_master (preset neutral)
+→ public/<video>/vo_<id>.wav + public/<video>/vo.json (durations).
+Only for pacing the draft: the final voice-over is recorded by a person. Files stay local (public/promo, public/guide are ignored)."""
 import argparse, json, os, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "public", "promo")
 
 
 def dur(p):
@@ -13,9 +13,12 @@ def dur(p):
 
 
 def main():
-    argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--video", choices=["promo", "guide"], default="promo")
+    a = ap.parse_args()
+    OUT = os.path.join(ROOT, "public", a.video)
     os.makedirs(OUT, exist_ok=True)
-    S = json.load(open(os.path.join(ROOT, "src", "promo", "script.json")))["scenes"]
+    S = json.load(open(os.path.join(ROOT, "src", a.video, "script.json")))["scenes"]
     tmp = tempfile.mkdtemp()
     meta = {}
     for s in S:
@@ -31,7 +34,7 @@ def main():
         subprocess.run([sys.executable, os.path.join(ROOT, "scripts/audio/voice_master.py"), "voice", raw, out, "--preset", "neutral"],
                        check=True, capture_output=True)
         meta[s["id"]] = round(dur(out), 3)
-        print(f"{s['id']:9} {meta[s['id']]:5.2f} s")
+        print(f"{s['id']:9} {meta[s['id']]:5.2f} s", flush=True)
     json.dump(meta, open(os.path.join(OUT, "vo.json"), "w"), indent=1)
 
 

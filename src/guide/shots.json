@@ -1,0 +1,23 @@
+{
+ "_comment": "Снимки гайда: окно → public/guide/shots/<name>.png (npm run guide:shots). Сырые снимки окон лежат в work/guide/raw (не в Git). terminal - отрезать заголовок и вкладку окна Терминала; trim - убрать пустые строки снизу; crop [x, y, w, h]; blur - размыть личное.",
+ "terminal": {"from": "terminal.png", "terminal": true, "crop": [0, 0, 0, 520]},
+ "paste": {"from": "paste.png", "terminal": true, "crop": [0, 0, 0, 520]},
+ "clone": {"from": "clone.png", "terminal": true, "trim": true},
+ "programs": {"from": "install_early.png", "terminal": true, "trim": true},
+ "brew": {"from": "brew.png", "terminal": true, "trim": true},
+ "sample": {"from": "install_sample.png", "terminal": true, "trim": true},
+ "done": {"from": "done.png", "terminal": true},
+ "render": {"from": "render.png", "terminal": true, "trim": true},
+ "result": {"from": "result.png"},
+ "studio": {"from": "studio.png"},
+ "config": {"from": "config.png"},
+ "rules": {"from": "rules.png"},
+ "analyze": {"from": "analyze.png", "terminal": true, "trim": true},
+ "presets": {"from": "presets.png", "terminal": true, "trim": true},
+ "trust": {"from": "agent_trust.png", "terminal": true, "trim": true, "blur": [[10, 54, 300, 26]]},
+ "agent": {"from": "agent.png", "terminal": true, "crop": [0, 0, 0, 150]},
+ "footage": {"from": "footage.png", "terminal": true, "trim": true},
+ "first": {"from": "agent_first.png", "terminal": true, "crop": [0, 0, 0, 330]},
+ "doctor": {"from": "doctor.png", "terminal": true, "trim": true},
+ "update": {"from": "update.png", "terminal": true, "trim": true}
+}

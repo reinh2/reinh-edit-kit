@@ -60,6 +60,7 @@ npx skills add WyattBlue/auto-editor
 | `scripts/example/` | `make_sample.py` (пример исходников на синтетике), `make_promo_vo.py` (черновой закадр промо для темпа) |
 | `src/kit/` | компоненты Remotion: `themes` (light / cine), `cine`, `chapter`, `ScreenCam`, `Captions`, `EndCard`, `Card`, `Hero3D` (3D-герои), `motion` (плавности), `fonts`, `sfx`, `words` |
 | `src/promo/` | промо-ролик набора в трёх вариантах стиля - живой пример |
+| `src/guide/` | гайд по установке: настоящие снимки окон, текст закадра для автора ([src/guide/README.md](src/guide/README.md)) |
 | `docs/` | [конвейер](docs/PIPELINE.md), [стандарт монтажа](docs/EDIT_STANDARD.md), [профили выдачи](docs/DELIVERY_PROFILES.md), [музыка и звуки](docs/MUSIC_AND_SFX.md) |
 | `examples/edl/` | пример EDL |
 
