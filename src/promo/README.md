@@ -15,7 +15,7 @@ npm run render:promo    # три черновика 720p в out/
 npx remotion render Promo out/promo_1440p60.mp4   # финал после замечаний
 ```
 
-Длина сцены = max(минимум, голос + 0.9 с): после записи настоящего голоса положите файлы `public/promo/vo_<сцена>.wav` и их длины в `public/promo/vo.json` - сцены подстроятся сами.
+Длина сцены = max(минимум, голос + 0.6 с): после записи настоящего голоса положите файлы `public/promo/vo_<сцена>.wav` и их длины в `public/promo/vo.json` - сцены подстроятся сами.
 Музыки нет: подложка - `scripts/audio/mix_bed.py`, затем `voice_master.py master --video`.
 
 ## Текст закадра (для записи)

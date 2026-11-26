@@ -6,7 +6,7 @@
 //   mix   — big moments cine (hook, inside, styles, limits, ending), the four guide steps light — like a real long video;
 // a light leak covers every scene change. Authored on a 1920×1080 grid and scaled (Fit).
 // Voice-over text: src/promo/script.json; scratch synthetic voice for pacing: `npm run promo:vo` (the final voice-over
-// is recorded by a person). Scene lengths = max(min, voice + 0.9 s). No music here: add the bed with mix_bed.py.
+// is recorded by a person). Scene lengths = max(min, voice + 0.6 s). No music here: add the bed with mix_bed.py.
 import React from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { LightLeak } from "../kit/chapter";
@@ -26,7 +26,7 @@ const rise = (p: number, dy = 24): React.CSSProperties => ({ opacity: clamp01(p)
 export type PromoVariant = "light" | "cine" | "mix";
 export type PromoProps = { vo: Record<string, number> | null; variant: PromoVariant };
 type SceneId = (typeof script.scenes)[number]["id"];
-export const sceneDurations = (vo: PromoProps["vo"]) => script.scenes.map((s) => Math.max(s.min, vo?.[s.id] ? vo[s.id] + 0.9 : 0));
+export const sceneDurations = (vo: PromoProps["vo"]) => script.scenes.map((s) => Math.max(s.min, vo?.[s.id] ? vo[s.id] + 0.6 : 0));
 export const promoFrames = (vo: PromoProps["vo"]) => Math.round(sceneDurations(vo).reduce((a, b) => a + b, 0) * PROMO_FPS);
 const MIX: Record<string, ThemeName> = { hook: "cine", pipeline: "cine", install: "light", mic: "light", agent: "light", qc: "light", styles: "cine", limits: "cine", cta: "cine" };
 const themeOf = (variant: PromoVariant, id: string): ThemeName => (variant === "mix" ? MIX[id] ?? "light" : variant);
@@ -121,7 +121,7 @@ const Hook: React.FC = () => {
   const pill = prog(t, 2.2, 0.5, ease.outBack);
   const cine = th.name === "cine";
   return (
-    <Scene t={t} back={cine ? "монтаж" : undefined}>
+    <Scene t={t}>
       <div style={abs({ left: 0, top: 690, width: W, height: 170, overflow: "hidden" })}>
         <div style={{ display: "flex", gap: 14, transform: `translateX(${-60 - t * 40}px)` }}>
           {Array.from({ length: 16 }, (_, i) => {
@@ -160,7 +160,7 @@ const Pipeline: React.FC = () => {
   const bottom = prog(t, 3.9, 0.5, ease.outCubic);
   const off = th.name === "cine" ? "rgba(160,190,255,0.35)" : "#B9BFCA";
   return (
-    <Scene t={t} label="Что внутри" back="конвейер">
+    <Scene t={t} label="Что внутри">
       <svg width={W} height={H} style={abs({ left: 0, top: 0 })}>
         <line x1={x0} y1={y} x2={x0 + step * 5} y2={y} stroke={th.track} strokeWidth={10} strokeLinecap="round" />
         <line x1={x0} y1={y} x2={x0 + step * 5 * line} y2={y} stroke={th.accent} strokeWidth={10} strokeLinecap="round" />
@@ -298,7 +298,7 @@ const Agent: React.FC = () => {
         <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: 30, color: th.muted }}>паузы режутся только в измеренной тишине</div>
         <div style={{ position: "relative", height: 120, marginTop: 50, borderRadius: 18, background: th.track }}>
           {CLIPS.map(([a, b, k], i) => {
-            const el = <div key={i} style={abs({ left: lerp(a * scale, packed, cut), top: 12, width: (b - a) * scale - 6, height: 96, borderRadius: 14, background: ["#2A3140", "#4A5A7A", th.accent][k] })} />;
+            const el = <div key={i} style={abs({ left: lerp(a * scale, packed, cut), top: 12, width: (b - a) * scale - 6, height: 96, borderRadius: 14, background: (th.name === "cine" ? ["#8EA3C8", "#5F7398", th.accent] : ["#2A3140", "#4A5A7A", th.accent])[k] })} />;
             packed += (b - a) * scale;
             return el;
           })}
@@ -485,8 +485,8 @@ export const Promo: React.FC<PromoProps> = ({ vo, variant = "mix" }) => {
           </Sequence>
         );
       })}
-      {/* one light leak on every scene change */}
-      {starts.slice(1).map((at, i) => <LightLeak key={i} t={t} at={at} seed={i} dark={themeOf(variant, script.scenes[i + 1].id) === "cine"} />)}
+      {/* one light leak on every scene change: soft between two cine scenes, full where light meets dark (covers the jump) */}
+      {starts.slice(1).map((at, i) => <LightLeak key={i} t={t} at={at} seed={i} dark={themeOf(variant, script.scenes[i].id) === "cine" && themeOf(variant, script.scenes[i + 1].id) === "cine"} />)}
       {starts.slice(1).map((at, i) => <S key={`w${i}`} at={at - 0.12} f="whoosh" db={-24} />)}
     </AbsoluteFill>
   );

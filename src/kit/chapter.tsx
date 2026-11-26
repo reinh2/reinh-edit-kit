@@ -20,8 +20,8 @@ export const LightLeak: React.FC<{ t: number; at: number; seed?: number; dark?: 
   const x = 50 + dir * lerp(-60, 60, p);
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
-      <AbsoluteFill style={{ background: dark ? "#CFE0FF" : "#FFFFFF", opacity: (dark ? 0.5 : 0.78) * Math.pow(k, 1.4) }} />
-      <AbsoluteFill style={{ filter: "blur(70px)", opacity: k }}>
+      <AbsoluteFill style={{ background: dark ? "#CFE0FF" : "#FFFFFF", opacity: (dark ? 0.3 : 0.78) * Math.pow(k, 1.4) }} />
+      <AbsoluteFill style={{ filter: "blur(70px)", opacity: dark ? k * 0.7 : k }}>
         <div style={abs({ left: `${x - 35}%`, top: "-20%", width: "70%", height: "140%", borderRadius: "50%", background: `radial-gradient(closest-side, ${C.accent}8C, ${C.accent}00)` })} />
         <div style={abs({ left: `${100 - x - 25}%`, top: "10%", width: "50%", height: "90%", borderRadius: "50%", background: "radial-gradient(closest-side, rgba(255,214,196,0.55), rgba(255,214,196,0))" })} />
         <div style={abs({ left: `${x - 60}%`, top: "35%", width: "120%", height: "18%", transform: `rotate(${dir * -12}deg)`, background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.95), rgba(255,255,255,0))" })} />

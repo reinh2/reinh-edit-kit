@@ -32,10 +32,10 @@ export const THEMES: Record<ThemeName, Theme> = {
   cine: {
     name: "cine", ink: "#FFFFFF", muted: "#8E9BB6", accent: C.accent, track: "rgba(160,190,255,0.16)", solid: C.accent, onSolid: "#FFFFFF",
     chip: "rgba(20,30,52,0.72)", chipBorder: "rgba(170,200,255,0.28)",
-    card: { background: "rgba(20,30,52,0.72)", border: "1px solid rgba(170,200,255,0.28)", backdropFilter: "blur(10px)",
+    card: { background: "rgba(16,25,44,0.92)", border: "1px solid rgba(170,200,255,0.28)", backdropFilter: "blur(10px)",
       boxShadow: `0 40px 120px rgba(0,0,0,0.55), 0 0 80px ${C.accent}47, inset 0 1px 0 rgba(255,255,255,0.18)` },
     Bg: ({ t }) => { loadCineFonts(); return <CineBg t={t} />; },
-    BackWord: ({ text, t, at = 0.05, top = 300 }) => <Chrome text={text} size={300} t={t} at={at} dim={0.16} style={{ left: 0, right: 0, top, textAlign: "center" }} />,
+    BackWord: ({ text, t, at = 0.05, top = 300 }) => <Chrome text={text} size={300} t={t} at={at} dim={0.1} style={{ left: 0, right: 0, top, textAlign: "center" }} />,
   },
 };
 
