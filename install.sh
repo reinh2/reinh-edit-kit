@@ -11,6 +11,9 @@
 # Флаги: --yes (не спрашивать), --skip-deps, --no-model, --model NAME (small|medium|large-v3-turbo), --no-sample, --no-test,
 #        --dir PATH (куда клонировать при запуске через curl, по умолчанию ~/reinh-edit-kit)
 set -euo pipefail
+# everything is inside main(): with `curl … | bash` bash reads the script from the same pipe the programs below inherit as
+# stdin, so a program that reads stdin would swallow the rest of the script; a function is read whole before it runs
+main() {
 
 REPO="${KIT_REPO:-https://github.com/reinh2/reinh-edit-kit.git}"
 YES=0 DEPS=1 MODEL=1 MODEL_NAME=small SAMPLE=1 TEST=1 DIR="$HOME/reinh-edit-kit"
@@ -131,3 +134,6 @@ cat <<EOF
   Дальше откройте папку в агенте (Claude Code, Codex, Gemini CLI) и напишите:
                      «вот дубли в footage/<дата>, смонтируй вертикальный ролик»
 EOF
+}
+
+main "$@"
